@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ETCAS投屏</string>
+    <string name="app_name_en">ETCAS Cast</string>
+    <string name="tagline">輕鬆投屏 · 極速流暢</string>
+
+    <string name="main_choose_mode">選擇模式</string>
+    <string name="mode_local">本地投屏</string>
+    <string name="mode_local_desc">選擇手機中的影片 / 圖片 / 檔案（支援所有格式），一鍵投屏到裝置</string>
+    <string name="mode_mirror">同步模式</string>
+    <string name="mode_mirror_desc">即時鏡像手機螢幕，手機在做什麼，裝置同步顯示什麼</string>
+    <string name="mode_link">連結投屏</string>
+    <string name="mode_link_desc">輸入連結，自動取得影片資訊，然後進行投屏</string>
+    <string name="btn_cast">投 屏</string>
+    <string name="btn_sound">聲音</string>
+    <string name="btn_qr">掃碼投屏</string>
+    <string name="btn_settings">設定</string>
+    <string name="select_mode_hint">請先選擇一種模式</string>
+
+    <string name="settings_title">設定</string>
+    <string name="settings_theme">主題顏色</string>
+    <string name="theme_sakura">櫻花粉</string>
+    <string name="theme_sea">海藍色</string>
+    <string name="theme_orange">橙黃色</string>
+    <string name="theme_emerald">碧綠色</string>
+    <string name="settings_mode">顯示模式</string>
+    <string name="mode_light">明亮模式</string>
+    <string name="mode_dark">暗黑模式</string>
+    <string name="mode_system">跟隨系統</string>
+    <string name="settings_font">語言與字體</string>
+    <string name="font_sc">簡體中文</string>
+    <string name="font_en">English</string>
+    <string name="font_tc">繁體中文</string>
+    <string name="font_jp">日本語</string>
+    <string name="settings_update">檢查更新</string>
+    <string name="update_checking">正在檢查更新…</string>
+    <string name="update_latest">已是最新版本</string>
+    <string name="update_found">發現新版本</string>
+    <string name="update_download">立即下載</string>
+    <string name="update_later">稍後再說</string>
+    <string name="update_fail">檢查更新失敗，請檢查網路</string>
+    <string name="settings_dev">開發者</string>
+    <string name="dev_name_label">開發者</string>
+    <string name="dev_name">ETC</string>
+    <string name="dev_version">版本 1.4.0</string>
+    <string name="dev_package">套件名稱 com.etc.cas</string>
+    <string name="dev_license">開放原始碼 MIT License</string>
+    <string name="license_dialog_title">開放原始碼授權</string>
+    <string name="license_subtitle">MIT License</string>
+    <string name="license_text">MIT License\n\nCopyright (c) 2026 ETC\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="settings_saved">設定已儲存</string>
+    <string name="close">關閉</string>
+
+    <string name="local_title">本地投屏</string>
+    <string name="local_pick">選擇檔案 / 影片 / 圖片</string>
+    <string name="local_pick_hint">支援所有格式：影片（mp4/mkv/webm/mov/avi/ts…）、圖片（jpg/png/gif/webp…）、音訊與文件</string>
+    <string name="local_no_file">尚未選擇檔案</string>
+    <string name="local_start_cast">搜尋裝置並投屏</string>
+
+    <string name="link_title">連結投屏</string>
+    <string name="link_input_hint">請輸入影片連結，如 https://example.com/video.mp4</string>
+    <string name="link_fetch">取得影片資訊</string>
+    <string name="link_fetching">正在取得影片資訊…</string>
+    <string name="link_fetch_fail">取得失敗，請檢查連結或網路</string>
+    <string name="link_empty">請先輸入連結</string>
+    <string name="link_start_cast">搜尋裝置並投屏</string>
+    <string name="link_media_direct">直連媒體</string>
+    <string name="link_media_page">網頁影片</string>
+
+    <string name="mirror_title">同步模式</string>
+    <string name="mirror_desc">允許螢幕擷取後，將即時鏡像手機畫面投屏到區域網路裝置。需要開啟螢幕擷取權限。</string>
+    <string name="mirror_start">開啟螢幕鏡像</string>
+    <string name="mirror_permission_denied">未授予螢幕擷取權限，無法開啟鏡像</string>
+    <string name="mirror_running">鏡像已開啟，正在預覽…</string>
+    <string name="mirror_browser_hint">也可在電視 / 電腦瀏覽器開啟以下位址即時查看：</string>
+    <string name="mirror_start_cast">搜尋裝置並開始投屏</string>
+
+    <string name="discovering">正在搜尋投屏裝置…</string>
+    <string name="discover_again">重新搜尋</string>
+    <string name="no_device">未發現可投屏裝置</string>
+    <string name="no_device_hint">請確認手機與裝置在同一 Wi-Fi，並開啟裝置的投屏 / DLNA 功能</string>
+    <string name="select_device_title">選擇投屏裝置</string>
+    <string name="searching_text">正在搜尋區域網路裝置…</string>
+    <string name="device_connecting">正在連線裝置…</string>
+    <string name="device_connected">已連線</string>
+    <string name="device_connect_fail">連線裝置失敗</string>
+    <string name="device_not_response">裝置未回應，本機播放中</string>
+
+    <string name="session_title">投屏中</string>
+    <string name="loading_text">軟體正在載入中…</string>
+    <string name="session_ready">內容已就緒，等待開始投屏</string>
+    <string name="session_start">開始投屏</string>
+    <string name="session_casting_to">正在投屏到：</string>
+    <string name="session_stop">停止投屏</string>
+    <string name="session_speed">倍速</string>
+    <string name="session_quality">清晰度</string>
+    <string name="session_volume">聲音</string>
+    <string name="quality_auto">自動</string>
+    <string name="quality_hd">高畫質</string>
+    <string name="quality_sd">標準</string>
+    <string name="quality_smooth">流暢</string>
+    <string name="speed_0_5">0.5x</string>
+    <string name="speed_1">1.0x</string>
+    <string name="speed_1_25">1.25x</string>
+    <string name="speed_1_5">1.5x</string>
+    <string name="speed_2">2.0x</string>
+    <string name="session_end">投屏已結束</string>
+    <string name="cast_volume_label">裝置音量</string>
+    <string name="sys_volume_label">系統音量</string>
+
+    <string name="qr_title">掃碼投屏</string>
+    <string name="qr_hint">掃描投屏二維碼（支援嗶哩嗶哩 / 酷喵 / 芒果等投屏碼）</string>
+    <string name="qr_result_invalid">未識別到有效的投屏連結</string>
+
+    <string name="permission_wifi_title">需要附近裝置權限</string>
+    <string name="permission_wifi_msg">用於搜尋同一 Wi-Fi 下的投屏裝置</string>
+    <string name="permission_wifi_denied">未授予附近裝置權限，無法搜尋投屏裝置</string>
+
+    <string name="ok">確定</string>
+    <string name="cancel">取消</string>
+    <string name="back">返回</string>
+    <string name="tip">提示</string>
+</resources>

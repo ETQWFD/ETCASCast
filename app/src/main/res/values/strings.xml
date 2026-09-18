@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ETCAS投屏</string>
+    <string name="app_name_en">ETCAS Cast</string>
+    <string name="tagline">轻松投屏 · 极速流畅</string>
+
+    <string name="main_choose_mode">选择模式</string>
+    <string name="mode_local">本地投屏</string>
+    <string name="mode_local_desc">选择手机中的视频 / 图片 / 文件（支持所有格式），一键投屏到设备</string>
+    <string name="mode_mirror">同步模式</string>
+    <string name="mode_mirror_desc">实时镜像手机屏幕，手机在干什么，设备同步显示什么</string>
+    <string name="mode_link">链接投屏</string>
+    <string name="mode_link_desc">输入链接，自动获取视频信息，然后进行投屏</string>
+    <string name="btn_cast">投 屏</string>
+    <string name="btn_sound">声音</string>
+    <string name="btn_qr">扫码投屏</string>
+    <string name="btn_settings">设置</string>
+    <string name="select_mode_hint">请先选择一种模式</string>
+
+    <string name="settings_title">设置</string>
+    <string name="settings_theme">主题颜色</string>
+    <string name="theme_sakura">樱花粉</string>
+    <string name="theme_sea">海蓝色</string>
+    <string name="theme_orange">橙黄色</string>
+    <string name="theme_emerald">碧绿色</string>
+    <string name="settings_mode">显示模式</string>
+    <string name="mode_light">明亮模式</string>
+    <string name="mode_dark">暗黑模式</string>
+    <string name="mode_system">跟随系统</string>
+    <string name="settings_font">语言与字体</string>
+    <string name="font_sc">中文简体</string>
+    <string name="font_en">English</string>
+    <string name="font_tc">中文繁體</string>
+    <string name="font_jp">日本語</string>
+    <string name="settings_update">检查更新</string>
+    <string name="update_checking">正在检查更新…</string>
+    <string name="update_latest">已是最新版本</string>
+    <string name="update_found">发现新版本</string>
+    <string name="update_download">立即下载</string>
+    <string name="update_later">以后再说</string>
+    <string name="update_fail">检查更新失败，请检查网络</string>
+    <string name="settings_dev">开发者</string>
+    <string name="dev_name_label">开发者</string>
+    <string name="dev_name">ETC</string>
+    <string name="dev_version">版本 1.4.0</string>
+    <string name="dev_package">包名 com.etc.cas</string>
+    <string name="dev_license">开源许可 MIT License</string>
+    <string name="license_dialog_title">开源许可</string>
+    <string name="license_subtitle">MIT License</string>
+    <string name="license_text">MIT License\n\nCopyright (c) 2026 ETC\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="settings_saved">设置已保存</string>
+    <string name="close">关闭</string>
+
+    <string name="local_title">本地投屏</string>
+    <string name="local_pick">选择文件 / 视频 / 图片</string>
+    <string name="local_pick_hint">支持所有格式：视频（mp4/mkv/webm/mov/avi/ts…）、图片（jpg/png/gif/webp…）、音频与文档</string>
+    <string name="local_no_file">尚未选择文件</string>
+    <string name="local_start_cast">搜索设备并投屏</string>
+
+    <string name="link_title">链接投屏</string>
+    <string name="link_input_hint">请输入视频链接，如 https://example.com/video.mp4</string>
+    <string name="link_fetch">获取视频信息</string>
+    <string name="link_fetching">正在获取视频信息…</string>
+    <string name="link_fetch_fail">获取失败，请检查链接或网络</string>
+    <string name="link_empty">请先输入链接</string>
+    <string name="link_start_cast">搜索设备并投屏</string>
+    <string name="link_media_direct">直链媒体</string>
+    <string name="link_media_page">网页视频</string>
+
+    <string name="mirror_title">同步模式</string>
+    <string name="mirror_desc">允许屏幕捕获后，将实时镜像手机画面投屏到局域网设备。需要开启屏幕捕获权限。</string>
+    <string name="mirror_start">开启屏幕镜像</string>
+    <string name="mirror_permission_denied">未授予屏幕捕获权限，无法开启镜像</string>
+    <string name="mirror_running">镜像已开启，正在预览…</string>
+    <string name="mirror_browser_hint">也可在电视 / 电脑浏览器打开以下地址实时查看：</string>
+    <string name="mirror_start_cast">搜索设备并开始投屏</string>
+
+    <string name="discovering">正在搜索投屏设备…</string>
+    <string name="discover_again">重新搜索</string>
+    <string name="no_device">未发现可投屏设备</string>
+    <string name="no_device_hint">请确认手机与设备在同一 Wi-Fi，并开启设备的投屏 / DLNA 功能</string>
+    <string name="select_device_title">选择投屏设备</string>
+    <string name="searching_text">正在搜索局域网设备…</string>
+    <string name="device_connecting">正在连接设备…</string>
+    <string name="device_connected">已连接</string>
+    <string name="device_connect_fail">连接设备失败</string>
+    <string name="device_not_response">设备未响应，本机播放中</string>
+
+    <string name="session_title">投屏中</string>
+    <string name="loading_text">软件正在加载中…</string>
+    <string name="session_ready">内容已就绪，等待开始投屏</string>
+    <string name="session_start">开始投屏</string>
+    <string name="session_casting_to">正在投屏到：</string>
+    <string name="session_stop">停止投屏</string>
+    <string name="session_speed">倍速</string>
+    <string name="session_quality">清晰度</string>
+    <string name="session_volume">声音</string>
+    <string name="quality_auto">自动</string>
+    <string name="quality_hd">高清</string>
+    <string name="quality_sd">标清</string>
+    <string name="quality_smooth">流畅</string>
+    <string name="speed_0_5">0.5x</string>
+    <string name="speed_1">1.0x</string>
+    <string name="speed_1_25">1.25x</string>
+    <string name="speed_1_5">1.5x</string>
+    <string name="speed_2">2.0x</string>
+    <string name="session_end">投屏已结束</string>
+    <string name="cast_volume_label">设备音量</string>
+    <string name="sys_volume_label">系统音量</string>
+
+    <string name="qr_title">扫码投屏</string>
+    <string name="qr_hint">扫描投屏二维码（支持哔哩哔哩 / 酷喵 / 芒果等投屏码）</string>
+    <string name="qr_result_invalid">未识别到有效的投屏链接</string>
+
+    <string name="permission_wifi_title">需要附近设备权限</string>
+    <string name="permission_wifi_msg">用于搜索同一 Wi-Fi 下的投屏设备</string>
+    <string name="permission_wifi_denied">未授予附近设备权限，无法搜索投屏设备</string>
+
+    <string name="ok">确定</string>
+    <string name="cancel">取消</string>
+    <string name="back">返回</string>
+    <string name="tip">提示</string>
+</resources>

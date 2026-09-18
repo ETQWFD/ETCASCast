@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ETCAS投屏</string>
+    <string name="app_name_en">ETCAS Cast</string>
+    <string name="tagline">らくらく投写・なめらか再生</string>
+
+    <string name="main_choose_mode">モードを選択</string>
+    <string name="mode_local">ローカル投写</string>
+    <string name="mode_local_desc">端末の動画・画像・ファイル（全形式対応）を選んで、ワンタップで投写</string>
+    <string name="mode_mirror">ミラーモード</string>
+    <string name="mode_mirror_desc">端末画面をリアルタイムでミラーリングし、他の端末に表示</string>
+    <string name="mode_link">リンク投写</string>
+    <string name="mode_link_desc">リンクを入力すると動画情報を自動取得して投写</string>
+    <string name="btn_cast">投 写</string>
+    <string name="btn_sound">サウンド</string>
+    <string name="btn_qr">QR投写</string>
+    <string name="btn_settings">設定</string>
+    <string name="select_mode_hint">先にモードを選択してください</string>
+
+    <string name="settings_title">設定</string>
+    <string name="settings_theme">テーマカラー</string>
+    <string name="theme_sakura">桜ピンク</string>
+    <string name="theme_sea">オーシャンブルー</string>
+    <string name="theme_orange">オレンジ</string>
+    <string name="theme_emerald">エメラルド</string>
+    <string name="settings_mode">表示モード</string>
+    <string name="mode_light">ライト</string>
+    <string name="mode_dark">ダーク</string>
+    <string name="mode_system">システム</string>
+    <string name="settings_font">言語とフォント</string>
+    <string name="font_sc">简体中文</string>
+    <string name="font_en">English</string>
+    <string name="font_tc">繁體中文</string>
+    <string name="font_jp">日本語</string>
+    <string name="settings_update">更新を確認</string>
+    <string name="update_checking">更新を確認中…</string>
+    <string name="update_latest">最新バージョンです</string>
+    <string name="update_found">新しいバージョンがあります</string>
+    <string name="update_download">ダウンロード</string>
+    <string name="update_later">後で</string>
+    <string name="update_fail">更新確認に失敗しました。ネットワークを確認してください</string>
+    <string name="settings_dev">開発者</string>
+    <string name="dev_name_label">開発者</string>
+    <string name="dev_name">ETC</string>
+    <string name="dev_version">バージョン 1.4.0</string>
+    <string name="dev_package">パッケージ com.etc.cas</string>
+    <string name="dev_license">オープンソース MIT License</string>
+    <string name="license_dialog_title">オープンソースライセンス</string>
+    <string name="license_subtitle">MIT License</string>
+    <string name="license_text">MIT License\n\nCopyright (c) 2026 ETC\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="settings_saved">設定を保存しました</string>
+    <string name="close">閉じる</string>
+
+    <string name="local_title">ローカル投写</string>
+    <string name="local_pick">ファイル / 動画 / 画像を選択</string>
+    <string name="local_pick_hint">全形式対応：動画（mp4/mkv/webm/mov/avi/ts…）、画像（jpg/png/gif/webp…）、音声とドキュメント</string>
+    <string name="local_no_file">ファイルが選択されていません</string>
+    <string name="local_start_cast">端末を検索して投写</string>
+
+    <string name="link_title">リンク投写</string>
+    <string name="link_input_hint">動画リンクを入力（例: https://example.com/video.mp4）</string>
+    <string name="link_fetch">動画情報を取得</string>
+    <string name="link_fetching">動画情報を取得中…</string>
+    <string name="link_fetch_fail">取得に失敗しました。リンクまたはネットワークを確認してください</string>
+    <string name="link_empty">先にリンクを入力してください</string>
+    <string name="link_start_cast">端末を検索して投写</string>
+    <string name="link_media_direct">直接メディア</string>
+    <string name="link_media_page">Web動画</string>
+
+    <string name="mirror_title">ミラーモード</string>
+    <string name="mirror_desc">画面キャプチャを許可すると、端末画面をリアルタイムでLAN内の端末にミラーリングします。</string>
+    <string name="mirror_start">ミラーリング開始</string>
+    <string name="mirror_permission_denied">画面キャプチャの権限がありません</string>
+    <string name="mirror_running">ミラーリング実行中…</string>
+    <string name="mirror_browser_hint">テレビ / パソコンのブラウザで以下のアドレスを開いても確認できます：</string>
+    <string name="mirror_start_cast">端末を検索して開始</string>
+
+    <string name="discovering">投写端末を検索中…</string>
+    <string name="discover_again">再検索</string>
+    <string name="no_device">投写できる端末が見つかりません</string>
+    <string name="no_device_hint">端末が同じWi-Fiにあり、投写 / DLNA機能が有効かを確認してください</string>
+    <string name="select_device_title">端末を選択</string>
+    <string name="searching_text">LAN内の端末を検索中…</string>
+    <string name="device_connecting">接続中…</string>
+    <string name="device_connected">接続済み</string>
+    <string name="device_connect_fail">接続に失敗しました</string>
+    <string name="device_not_response">端末が応答しません。ローカル再生中</string>
+
+    <string name="session_title">投写中</string>
+    <string name="loading_text">読み込み中…</string>
+    <string name="session_ready">準備完了、投写開始を待っています</string>
+    <string name="session_start">投写開始</string>
+    <string name="session_casting_to">投写先：</string>
+    <string name="session_stop">投写停止</string>
+    <string name="session_speed">再生速度</string>
+    <string name="session_quality">画質</string>
+    <string name="session_volume">サウンド</string>
+    <string name="quality_auto">自動</string>
+    <string name="quality_hd">HD</string>
+    <string name="quality_sd">SD</string>
+    <string name="quality_smooth">スムーズ</string>
+    <string name="speed_0_5">0.5x</string>
+    <string name="speed_1">1.0x</string>
+    <string name="speed_1_25">1.25x</string>
+    <string name="speed_1_5">1.5x</string>
+    <string name="speed_2">2.0x</string>
+    <string name="session_end">投写を終了しました</string>
+    <string name="cast_volume_label">端末音量</string>
+    <string name="sys_volume_label">システム音量</string>
+
+    <string name="qr_title">QR投写</string>
+    <string name="qr_hint">投写QRコードをスキャン（ビリビリ / 酷喵 / 芒果TVなど対応）</string>
+    <string name="qr_result_invalid">有効な投写リンクが見つかりません</string>
+
+    <string name="permission_wifi_title">周辺端末の権限が必要です</string>
+    <string name="permission_wifi_msg">同じWi-Fi内の投写端末を探すために使用します</string>
+    <string name="permission_wifi_denied">周辺端末の権限がないため検索できません</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">キャンセル</string>
+    <string name="back">戻る</string>
+    <string name="tip">ヒント</string>
+</resources>

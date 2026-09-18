@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ETCAS Cast</string>
+    <string name="app_name_en">ETCAS Cast</string>
+    <string name="tagline">Cast smooth. Play smooth.</string>
+
+    <string name="main_choose_mode">Choose Mode</string>
+    <string name="mode_local">Local Cast</string>
+    <string name="mode_local_desc">Pick videos / photos / files from your phone (all formats supported) and cast with one tap</string>
+    <string name="mode_mirror">Screen Mirror</string>
+    <string name="mode_mirror_desc">Mirror your phone screen in real time to any device</string>
+    <string name="mode_link">Link Cast</string>
+    <string name="mode_link_desc">Paste a link, auto-fetch video info and cast it</string>
+    <string name="btn_cast">C A S T</string>
+    <string name="btn_sound">Sound</string>
+    <string name="btn_qr">QR Cast</string>
+    <string name="btn_settings">Settings</string>
+    <string name="select_mode_hint">Please choose a mode first</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_theme">Theme Color</string>
+    <string name="theme_sakura">Sakura</string>
+    <string name="theme_sea">Ocean Blue</string>
+    <string name="theme_orange">Orange</string>
+    <string name="theme_emerald">Emerald</string>
+    <string name="settings_mode">Display Mode</string>
+    <string name="mode_light">Light</string>
+    <string name="mode_dark">Dark</string>
+    <string name="mode_system">System</string>
+    <string name="settings_font">Language &amp; Font</string>
+    <string name="font_sc">简体中文</string>
+    <string name="font_en">English</string>
+    <string name="font_tc">繁體中文</string>
+    <string name="font_jp">日本語</string>
+    <string name="settings_update">Check Updates</string>
+    <string name="update_checking">Checking for updates…</string>
+    <string name="update_latest">You are up to date</string>
+    <string name="update_found">New version available</string>
+    <string name="update_download">Download</string>
+    <string name="update_later">Later</string>
+    <string name="update_fail">Update check failed, check your network</string>
+    <string name="settings_dev">Developer</string>
+    <string name="dev_name_label">Developer</string>
+    <string name="dev_name">ETC</string>
+    <string name="dev_version">Version 1.4.0</string>
+    <string name="dev_package">Package com.etc.cas</string>
+    <string name="dev_license">Open Source MIT License</string>
+    <string name="license_dialog_title">Open Source License</string>
+    <string name="license_subtitle">MIT License</string>
+    <string name="license_text">MIT License\n\nCopyright (c) 2026 ETC\n\nPermission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</string>
+    <string name="settings_saved">Settings saved</string>
+    <string name="close">Close</string>
+
+    <string name="local_title">Local Cast</string>
+    <string name="local_pick">Pick File / Video / Photo</string>
+    <string name="local_pick_hint">All formats supported: video (mp4/mkv/webm/mov/avi/ts…), photo (jpg/png/gif/webp…), audio and documents</string>
+    <string name="local_no_file">No file selected</string>
+    <string name="local_start_cast">Search Devices &amp; Cast</string>
+
+    <string name="link_title">Link Cast</string>
+    <string name="link_input_hint">Enter a video link, e.g. https://example.com/video.mp4</string>
+    <string name="link_fetch">Fetch Video Info</string>
+    <string name="link_fetching">Fetching video info…</string>
+    <string name="link_fetch_fail">Fetch failed, check the link or network</string>
+    <string name="link_empty">Enter a link first</string>
+    <string name="link_start_cast">Search Devices &amp; Cast</string>
+    <string name="link_media_direct">Direct Media</string>
+    <string name="link_media_page">Web Video</string>
+
+    <string name="mirror_title">Screen Mirror</string>
+    <string name="mirror_desc">After allowing screen capture, your phone screen will be mirrored to devices on the LAN in real time.</string>
+    <string name="mirror_start">Start Mirroring</string>
+    <string name="mirror_permission_denied">Screen capture permission not granted</string>
+    <string name="mirror_running">Mirroring is running…</string>
+    <string name="mirror_browser_hint">You can also open the address below in a TV / computer browser:</string>
+    <string name="mirror_start_cast">Search Devices &amp; Start</string>
+
+    <string name="discovering">Searching for cast devices…</string>
+    <string name="discover_again">Search Again</string>
+    <string name="no_device">No cast device found</string>
+    <string name="no_device_hint">Make sure your phone and device are on the same Wi-Fi and the device supports cast / DLNA</string>
+    <string name="select_device_title">Choose a Device</string>
+    <string name="searching_text">Searching devices on LAN…</string>
+    <string name="device_connecting">Connecting…</string>
+    <string name="device_connected">Connected</string>
+    <string name="device_connect_fail">Failed to connect</string>
+    <string name="device_not_response">Device not responding, playing locally</string>
+
+    <string name="session_title">Casting</string>
+    <string name="loading_text">Loading…</string>
+    <string name="session_ready">Ready, waiting to start</string>
+    <string name="session_start">Start Casting</string>
+    <string name="session_casting_to">Casting to:</string>
+    <string name="session_stop">Stop Casting</string>
+    <string name="session_speed">Speed</string>
+    <string name="session_quality">Quality</string>
+    <string name="session_volume">Sound</string>
+    <string name="quality_auto">Auto</string>
+    <string name="quality_hd">HD</string>
+    <string name="quality_sd">SD</string>
+    <string name="quality_smooth">Smooth</string>
+    <string name="speed_0_5">0.5x</string>
+    <string name="speed_1">1.0x</string>
+    <string name="speed_1_25">1.25x</string>
+    <string name="speed_1_5">1.5x</string>
+    <string name="speed_2">2.0x</string>
+    <string name="session_end">Casting stopped</string>
+    <string name="cast_volume_label">Device Volume</string>
+    <string name="sys_volume_label">System Volume</string>
+
+    <string name="qr_title">QR Cast</string>
+    <string name="qr_hint">Scan a cast QR code (Bilibili / Youku / Mango TV etc.)</string>
+    <string name="qr_result_invalid">No valid cast link found</string>
+
+    <string name="permission_wifi_title">Nearby devices permission needed</string>
+    <string name="permission_wifi_msg">Used to find cast devices on the same Wi-Fi</string>
+    <string name="permission_wifi_denied">Nearby devices permission denied, cannot search</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
+    <string name="tip">Tip</string>
+</resources>

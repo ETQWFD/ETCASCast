@@ -1,0 +1,12 @@
+.gradle/
+build/
+app/build/
+local.properties
+.idea/
+*.iml
+keystore/
+demo/seg*.mp4
+demo/list.txt
+demo/frame_*.jpg
+website/_shots/
+UI预览.html

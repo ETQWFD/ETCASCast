@@ -1,0 +1,119 @@
+package com.etc.cas;
+
+import android.content.res.ColorStateList;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
+
+public class SettingsActivity extends BaseActivity {
+
+    private View themeSakura;
+    private View themeSea;
+    private View themeOrange;
+    private View themeEmerald;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_settings);
+
+        themeSakura = findViewById(R.id.theme_sakura);
+        themeSea = findViewById(R.id.theme_sea);
+        themeOrange = findViewById(R.id.theme_orange);
+        themeEmerald = findViewById(R.id.theme_emerald);
+
+        themeSakura.setOnClickListener(v -> pickTheme(Prefs.THEME_SAKURA));
+        themeSea.setOnClickListener(v -> pickTheme(Prefs.THEME_SEA));
+        themeOrange.setOnClickListener(v -> pickTheme(Prefs.THEME_ORANGE));
+        themeEmerald.setOnClickListener(v -> pickTheme(Prefs.THEME_EMERALD));
+
+        findViewById(R.id.chip_mode_light).setOnClickListener(v -> pickMode(Prefs.MODE_LIGHT));
+        findViewById(R.id.chip_mode_dark).setOnClickListener(v -> pickMode(Prefs.MODE_DARK));
+        findViewById(R.id.chip_mode_system).setOnClickListener(v -> pickMode(Prefs.MODE_SYSTEM));
+
+        findViewById(R.id.chip_font_sc).setOnClickListener(v -> pickFont(Prefs.FONT_SC));
+        findViewById(R.id.chip_font_en).setOnClickListener(v -> pickFont(Prefs.FONT_EN));
+        findViewById(R.id.chip_font_tc).setOnClickListener(v -> pickFont(Prefs.FONT_TC));
+        findViewById(R.id.chip_font_jp).setOnClickListener(v -> pickFont(Prefs.FONT_JP));
+
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+
+        findViewById(R.id.row_update).setOnClickListener(v ->
+                UpdateChecker.check(this));
+
+        findViewById(R.id.row_license).setOnClickListener(v -> showLicense());
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ThemeManager.apply(this);
+        FontManager.apply(findViewById(android.R.id.content), this);
+        refreshState();
+    }
+
+    private void refreshState() {
+        String theme = Prefs.theme(this);
+        markTheme(themeSakura, Prefs.THEME_SAKURA.equals(theme));
+        markTheme(themeSea, Prefs.THEME_SEA.equals(theme));
+        markTheme(themeOrange, Prefs.THEME_ORANGE.equals(theme));
+        markTheme(themeEmerald, Prefs.THEME_EMERALD.equals(theme));
+
+        String mode = Prefs.mode(this);
+        ThemeManager.colorChip(this, findViewById(R.id.chip_mode_light), Prefs.MODE_LIGHT.equals(mode));
+        ThemeManager.colorChip(this, findViewById(R.id.chip_mode_dark), Prefs.MODE_DARK.equals(mode));
+        ThemeManager.colorChip(this, findViewById(R.id.chip_mode_system), Prefs.MODE_SYSTEM.equals(mode));
+
+        String font = Prefs.font(this);
+        ThemeManager.colorChip(this, findViewById(R.id.chip_font_sc), Prefs.FONT_SC.equals(font));
+        ThemeManager.colorChip(this, findViewById(R.id.chip_font_en), Prefs.FONT_EN.equals(font));
+        ThemeManager.colorChip(this, findViewById(R.id.chip_font_tc), Prefs.FONT_TC.equals(font));
+        ThemeManager.colorChip(this, findViewById(R.id.chip_font_jp), Prefs.FONT_JP.equals(font));
+    }
+
+    private void markTheme(View circle, boolean selected) {
+        int accent = ThemeManager.accent(this);
+        circle.setBackgroundTintList(ColorStateList.valueOf(accent));
+        if (selected) {
+            circle.setPadding(dp(4), dp(4), dp(4), dp(4));
+        } else {
+            circle.setPadding(dp(0), dp(0), dp(0), dp(0));
+        }
+    }
+
+    private int dp(int v) {
+        return (int) (getResources().getDisplayMetrics().density * v + 0.5f);
+    }
+
+    private void pickTheme(String theme) {
+        Prefs.setTheme(this, theme);
+        Toast.makeText(this, R.string.settings_saved, Toast.LENGTH_SHORT).show();
+        onResume();
+    }
+
+    private void pickMode(String mode) {
+        Prefs.setMode(this, mode);
+        ThemeManager.applyNightMode(this);
+        recreate();
+    }
+
+    private void pickFont(String font) {
+        Prefs.setFont(this, font);
+        recreate();
+    }
+
+    private void showLicense() {
+        View content = getLayoutInflater().inflate(R.layout.dialog_license, null);
+        TextView tvLicense = content.findViewById(R.id.tv_license_text);
+        tvLicense.setText(getString(R.string.license_text));
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(content)
+                .setCancelable(true)
+                .create();
+        content.findViewById(R.id.btn_license_close).setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+}

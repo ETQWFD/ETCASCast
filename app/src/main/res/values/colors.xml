@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 明暗通用基础色 -->
+    <color name="bg_light">#F6F7FB</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="text_primary_light">#1A1A2E</color>
+    <color name="text_secondary_light">#6E6E85</color>
+    <color name="divider_light">#E6E6F0</color>
+
+    <color name="bg_dark">#11131A</color>
+    <color name="surface_dark">#1C1F28</color>
+    <color name="text_primary_dark">#EDEFF7</color>
+    <color name="text_secondary_dark">#9AA0B4</color>
+    <color name="divider_dark">#2A2E3B</color>
+
+    <!-- 四种主题强调色 -->
+    <color name="accent_sakura">#EC5C8B</color>
+    <color name="accent_sakura_deep">#C93E6F</color>
+    <color name="accent_sakura_soft">#FCE4EC</color>
+
+    <color name="accent_sea">#2E86DE</color>
+    <color name="accent_sea_deep">#1B5FA8</color>
+    <color name="accent_sea_soft">#E3F2FD</color>
+
+    <color name="accent_orange">#F5A623</color>
+    <color name="accent_orange_deep">#D67E00</color>
+    <color name="accent_orange_soft">#FFF3E0</color>
+
+    <color name="accent_emerald">#21A366</color>
+    <color name="accent_emerald_deep">#0F7A4B</color>
+    <color name="accent_emerald_soft">#E0F2E9</color>
+
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#66000000</color>
+
+    <!-- 状态栏默认 -->
+    <color name="status_bar_light">#F6F7FB</color>
+    <color name="status_bar_dark">#11131A</color>
+</resources>

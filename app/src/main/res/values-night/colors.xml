@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#11131A</color>
+    <color name="surface">#1C1F28</color>
+    <color name="text_primary">#EDEFF7</color>
+    <color name="text_secondary">#9AA0B4</color>
+    <color name="divider">#2A2E3B</color>
+    <color name="status_bar">#11131A</color>
+</resources>

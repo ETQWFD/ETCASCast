@@ -6,7 +6,7 @@ ETCAS Cast 是一款开源的本地投屏工具，支持将手机中的视频、
 
 ## 演示
 
-<video src="demo/ETCASCast-demo.mp4" controls width="360"></video>
+<video src="demo/ETCASCast-tutorial.mp4" controls width="360"></video>
 
 ## 功能
 

@@ -309,18 +309,24 @@ public class LocalFileServer {
     }
 
     private static String localIp() {
+        String fallback = null;
         try {
             for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
                 if (!ni.isUp() || ni.isLoopback()) continue;
+                String nif = ni.getName().toLowerCase();
                 for (InetAddress a : Collections.list(ni.getInetAddresses())) {
                     if (a instanceof Inet4Address && !a.isLoopbackAddress()) {
-                        return a.getHostAddress();
+                        String ip = a.getHostAddress();
+                        if (fallback == null) fallback = ip;
+                        if (nif.startsWith("wlan") || nif.startsWith("wifi") || nif.startsWith("ap")) {
+                            return ip;
+                        }
                     }
                 }
             }
         } catch (Exception ignored) {
         }
-        return "127.0.0.1";
+        return fallback != null ? fallback : "127.0.0.1";
     }
 
     public static final class AppHolder {

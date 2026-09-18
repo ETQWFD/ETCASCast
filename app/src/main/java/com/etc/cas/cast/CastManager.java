@@ -75,7 +75,10 @@ public class CastManager {
                 while ((n = in.read(buf)) > 0) bos.write(buf, 0, n);
                 in.close();
                 String resp = bos.toString("UTF-8");
-                return code == 200 && (resp.contains("200 OK") || resp.contains(":Response"));
+                if (code == 200) {
+                    return resp.isEmpty() || resp.contains("200 OK") || resp.contains(":Response");
+                }
+                return false;
             }
             return code == 200;
         } catch (Exception e) {

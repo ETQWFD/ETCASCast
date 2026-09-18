@@ -26,6 +26,8 @@ public class DevicePickDialog {
         void onPick(CastDevice device);
 
         void onRefresh();
+
+        void onManual();
     }
 
     public static AlertDialog show(Context ctx, List<CastDevice> devices, Callback cb) {
@@ -37,6 +39,10 @@ public class DevicePickDialog {
                     .setCancelable(true)
                     .create();
             content.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
+            content.findViewById(R.id.btn_manual).setOnClickListener(v -> {
+                dialog.dismiss();
+                if (cb != null) cb.onManual();
+            });
             applyState(dialog, devices, cb);
             dialog.show();
             return dialog;
@@ -75,7 +81,6 @@ public class DevicePickDialog {
         panelEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
         btnRefresh.setVisibility(searching ? View.GONE : View.VISIBLE);
         list.setVisibility(searching || empty ? View.GONE : View.VISIBLE);
-
         if (devices != null) {
             DeviceAdapter adapter = new DeviceAdapter(ctx, devices);
             list.setAdapter(adapter);

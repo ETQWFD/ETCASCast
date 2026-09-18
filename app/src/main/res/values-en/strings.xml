@@ -127,4 +127,8 @@
     <string name="local_converting">Converting to MP4…</string>
     <string name="local_converted">Converted to MP4, ready to cast.</string>
     <string name="local_convert_fail">Conversion failed. Will try casting the original file.</string>
+    <string name="manual_add">Add Manually</string>
+    <string name="input_ip_hint">Enter device IP or description URL (e.g. 192.168.1.100)</string>
+    <string name="probing">Probing device…</string>
+    <string name="confirm">OK</string>
 </resources>

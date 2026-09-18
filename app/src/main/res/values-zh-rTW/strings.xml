@@ -127,4 +127,8 @@
     <string name="local_converting">正在轉換為 MP4…</string>
     <string name="local_converted">已轉換為 MP4，可正常投屏</string>
     <string name="local_convert_fail">轉換失敗，將按原始檔案嘗試投屏</string>
+    <string name="manual_add">手動新增裝置</string>
+    <string name="input_ip_hint">輸入裝置 IP 或描述位址（如 192.168.1.100）</string>
+    <string name="probing">正在探測裝置…</string>
+    <string name="confirm">確定</string>
 </resources>

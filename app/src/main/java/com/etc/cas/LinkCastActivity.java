@@ -156,6 +156,35 @@ public class LinkCastActivity extends BaseActivity {
             public void onRefresh() {
                 discoverAndPick();
             }
+
+            @Override
+            public void onManual() {
+                manualAdd();
+            }
         };
+    }
+
+    private void manualAdd() {
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint(R.string.input_ip_hint);
+        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT);
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.manual_add)
+                .setView(input)
+                .setPositiveButton(R.string.confirm, (d, w) -> {
+                    String ip = input.getText().toString().trim();
+                    if (ip.isEmpty()) return;
+                    Toast.makeText(this, R.string.probing, Toast.LENGTH_SHORT).show();
+                    new DeviceDiscoverer().probeIp(this, ip, devices -> runOnUiThread(() -> {
+                        if (devices == null || devices.isEmpty()) {
+                            Toast.makeText(LinkCastActivity.this, R.string.device_search_fail, Toast.LENGTH_SHORT).show();
+                        } else {
+                            AlertDialog dialog = DevicePickDialog.show(LinkCastActivity.this, devices, callback());
+                            if (dialog == null) callback().onPick(devices.get(0));
+                        }
+                    }));
+                })
+                .setNegativeButton(R.string.cancel, null)
+                .show();
     }
 }

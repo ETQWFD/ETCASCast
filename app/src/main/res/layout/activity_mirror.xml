@@ -48,19 +48,44 @@
         android:layout_weight="1"
         android:background="@drawable/bg_panel">
 
-        <SurfaceView
-            android:id="@+id/sv_preview"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <TextView
-            android:id="@+id/tv_mirror_status"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="@string/mirror_start"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:alpha="0.85"
+                android:contentDescription="@string/mirror_title"
+                android:src="@drawable/ic_cast"
+                android:tag="icon_accent" />
+
+            <TextView
+                android:id="@+id/tv_mirror_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="center"
+                android:text="@string/mirror_start"
+                android:textColor="@color/text_primary"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_mirror_live"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/mirror_live_hint"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp"
+                android:visibility="gone" />
+        </LinearLayout>
     </FrameLayout>
 
     <TextView

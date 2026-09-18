@@ -19,7 +19,9 @@ import com.etc.cas.cast.LocalFileServer;
 import com.etc.cas.discovery.CastDevice;
 import com.etc.cas.discovery.DeviceDiscoverer;
 import com.etc.cas.util.DevicePickDialog;
+import com.etc.cas.util.M4sConverter;
 
+import java.io.File;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.util.List;
@@ -75,12 +77,40 @@ public class LocalCastActivity extends BaseActivity {
             ((TextView) findViewById(R.id.tv_file_name)).setText(fileName);
             ((TextView) findViewById(R.id.tv_file_info)).setText(buildInfo());
 
-            ImageView preview = findViewById(R.id.img_preview);
-            if (fileMime != null && fileMime.startsWith("image/")) {
-                loadImagePreview(uri, preview);
+            if (M4sConverter.isM4s(fileName)) {
+                ((TextView) findViewById(R.id.tv_file_info)).setText(R.string.local_converting);
+                convertM4s(uri, panel);
             } else {
-                preview.setVisibility(View.GONE);
+                showPreview(uri, panel);
             }
+        }
+    }
+
+    private void convertM4s(Uri uri, LinearLayout panel) {
+        final String name = fileName;
+        new Thread(() -> {
+            File mp4 = M4sConverter.convert(this, uri, name);
+            runOnUiThread(() -> {
+                if (mp4 != null && mp4.length() > 0) {
+                    fileUri = Uri.fromFile(mp4);
+                    fileMime = "video/mp4";
+                    fileSize = mp4.length();
+                    ((TextView) findViewById(R.id.tv_file_name)).setText(name + "（MP4）");
+                    ((TextView) findViewById(R.id.tv_file_info)).setText(R.string.local_converted);
+                } else {
+                    ((TextView) findViewById(R.id.tv_file_info)).setText(buildInfo());
+                    Toast.makeText(this, R.string.local_convert_fail, Toast.LENGTH_LONG).show();
+                }
+            });
+        }, "etcas-m4s").start();
+    }
+
+    private void showPreview(Uri uri, LinearLayout panel) {
+        ImageView preview = findViewById(R.id.img_preview);
+        if (fileMime != null && fileMime.startsWith("image/")) {
+            loadImagePreview(uri, preview);
+        } else {
+            preview.setVisibility(View.GONE);
         }
     }
 
@@ -149,9 +179,18 @@ public class LocalCastActivity extends BaseActivity {
     }
 
     private void discoverAndPick() {
-        AlertDialog dialog = DevicePickDialog.show(this, null, callback());
-        new DeviceDiscoverer().start(this, devices -> runOnUiThread(() ->
-                DevicePickDialog.update(dialog, devices, callback())));
+        try {
+            AlertDialog dialog = DevicePickDialog.show(this, null, callback());
+            if (dialog == null) return;
+            new DeviceDiscoverer().start(this, devices -> runOnUiThread(() -> {
+                try {
+                    DevicePickDialog.update(dialog, devices, callback());
+                } catch (Exception ignored) {
+                }
+            }));
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.device_search_fail, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private DevicePickDialog.Callback callback() {

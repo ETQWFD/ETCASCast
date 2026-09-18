@@ -29,16 +29,20 @@ public class DevicePickDialog {
     }
 
     public static AlertDialog show(Context ctx, List<CastDevice> devices, Callback cb) {
-        View content = LayoutInflater.from(ctx).inflate(R.layout.dialog_device_list, null);
-        AlertDialog dialog = new AlertDialog.Builder(ctx)
-                .setTitle(R.string.select_device_title)
-                .setView(content)
-                .setCancelable(true)
-                .create();
-        content.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
-        applyState(dialog, devices, cb);
-        dialog.show();
-        return dialog;
+        try {
+            View content = LayoutInflater.from(ctx).inflate(R.layout.dialog_device_list, null);
+            AlertDialog dialog = new AlertDialog.Builder(ctx)
+                    .setTitle(R.string.select_device_title)
+                    .setView(content)
+                    .setCancelable(true)
+                    .create();
+            content.findViewById(R.id.btn_cancel).setOnClickListener(v -> dialog.dismiss());
+            applyState(dialog, devices, cb);
+            dialog.show();
+            return dialog;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public static void update(AlertDialog dialog, List<CastDevice> devices, Callback cb) {

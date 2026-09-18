@@ -52,7 +52,8 @@ public class VolumeDialog {
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 tvDeviceVal.setText(String.valueOf(progress));
                 if (fromUser && device != null) {
-                    CastManager.setVolume(device, progress);
+                    final int v = progress;
+                    new Thread(() -> CastManager.setVolume(device, v), "etcas-volume").start();
                 }
             }
 

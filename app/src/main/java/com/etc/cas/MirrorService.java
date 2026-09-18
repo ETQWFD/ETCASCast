@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
@@ -17,18 +16,15 @@ import android.media.projection.MediaProjectionManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.view.SurfaceHolder;
 
 import com.etc.cas.cast.LocalFileServer;
 
 import java.io.ByteArrayOutputStream;
-import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 
 public class MirrorService extends Service {
 
     public static final String ACTION_START = "com.etc.cas.START_MIRROR";
-    public static volatile WeakReference<SurfaceHolder> previewHolder;
 
     private MediaProjection projection;
     private VirtualDisplay vd;
@@ -83,17 +79,6 @@ public class MirrorService extends Service {
                     if (image == null) return;
                     Bitmap frame = toBitmap(image, w, h);
                     if (frame == null) return;
-                    SurfaceHolder holder = previewHolder == null ? null : previewHolder.get();
-                    if (holder != null && holder.getSurface() != null && holder.getSurface().isValid()) {
-                        try {
-                            Canvas canvas = holder.lockCanvas();
-                            if (canvas != null) {
-                                canvas.drawBitmap(frame, 0, 0, null);
-                                holder.unlockCanvasAndPost(canvas);
-                            }
-                        } catch (Exception ignored) {
-                        }
-                    }
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     frame.compress(Bitmap.CompressFormat.JPEG, 72, bos);
                     frame.recycle();

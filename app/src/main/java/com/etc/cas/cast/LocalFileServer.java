@@ -151,7 +151,12 @@ public class LocalFileServer {
         long total = querySize(cr, uri);
         String mime = currentMime != null ? currentMime : "application/octet-stream";
 
-        InputStream src = cr.openInputStream(uri);
+        InputStream src;
+        if ("file".equals(uri.getScheme())) {
+            src = new java.io.FileInputStream(uri.getPath());
+        } else {
+            src = cr.openInputStream(uri);
+        }
         if (src == null) {
             out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
             out.flush();
@@ -275,6 +280,13 @@ public class LocalFileServer {
     }
 
     private static long querySize(ContentResolver cr, Uri uri) {
+        if ("file".equals(uri.getScheme())) {
+            try {
+                return new java.io.File(uri.getPath()).length();
+            } catch (Exception ignored) {
+            }
+            return -1;
+        }
         try (Cursor c = cr.query(uri, null, null, null, null)) {
             if (c != null && c.moveToFirst()) {
                 int idx = c.getColumnIndex(OpenableColumns.SIZE);

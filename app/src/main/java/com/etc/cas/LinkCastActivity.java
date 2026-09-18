@@ -124,9 +124,18 @@ public class LinkCastActivity extends BaseActivity {
     }
 
     private void discoverAndPick() {
-        AlertDialog dialog = DevicePickDialog.show(this, null, callback());
-        new DeviceDiscoverer().start(this, devices -> runOnUiThread(() ->
-                DevicePickDialog.update(dialog, devices, callback())));
+        try {
+            AlertDialog dialog = DevicePickDialog.show(this, null, callback());
+            if (dialog == null) return;
+            new DeviceDiscoverer().start(this, devices -> runOnUiThread(() -> {
+                try {
+                    DevicePickDialog.update(dialog, devices, callback());
+                } catch (Exception ignored) {
+                }
+            }));
+        } catch (Exception e) {
+            Toast.makeText(this, R.string.device_search_fail, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private DevicePickDialog.Callback callback() {

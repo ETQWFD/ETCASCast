@@ -120,4 +120,11 @@
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="tip">Tip</string>
+    <string name="mirror_stop">Stop Mirroring</string>
+    <string name="mirror_live_hint">The device is watching your screen live. You can go back and keep using your phone.</string>
+    <string name="device_search_fail">Search failed. Check your network and try again.</string>
+    <string name="session_play_fail">Cannot play this file. The format may not be supported.</string>
+    <string name="local_converting">Converting to MP4…</string>
+    <string name="local_converted">Converted to MP4, ready to cast.</string>
+    <string name="local_convert_fail">Conversion failed. Will try casting the original file.</string>
 </resources>

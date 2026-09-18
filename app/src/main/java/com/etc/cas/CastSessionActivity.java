@@ -66,7 +66,11 @@ public class CastSessionActivity extends BaseActivity {
         title = getIntent().getStringExtra("title");
         mime = getIntent().getStringExtra("mime");
         isDirect = getIntent().getBooleanExtra("isDirect", true);
-        device = (CastDevice) getIntent().getSerializableExtra("device");
+        try {
+            device = (CastDevice) getIntent().getSerializableExtra("device");
+        } catch (Exception e) {
+            device = null;
+        }
 
         if (mime == null) mime = "";
         isImage = mime.startsWith("image/") || (mediaUrl != null && isImageExt(mediaUrl));
@@ -114,10 +118,20 @@ public class CastSessionActivity extends BaseActivity {
             imgImage.setVisibility(View.VISIBLE);
             loadImage();
         } else if (isDirect) {
-            player = new ExoPlayer.Builder(this).build();
-            playerView.setPlayer(player);
-            player.setMediaItem(MediaItem.fromUri(Uri.parse(mediaUrl)));
-            player.prepare();
+            try {
+                player = new ExoPlayer.Builder(this).build();
+                playerView.setPlayer(player);
+                player.addListener(new androidx.media3.common.Player.Listener() {
+                    @Override
+                    public void onPlayerError(androidx.media3.common.PlaybackException error) {
+                        Toast.makeText(CastSessionActivity.this, R.string.session_play_fail, Toast.LENGTH_LONG).show();
+                    }
+                });
+                player.setMediaItem(MediaItem.fromUri(Uri.parse(mediaUrl)));
+                player.prepare();
+            } catch (Exception e) {
+                Toast.makeText(this, R.string.session_play_fail, Toast.LENGTH_LONG).show();
+            }
         } else {
             playerView.setVisibility(View.GONE);
             webView = new WebView(this);
@@ -142,13 +156,18 @@ public class CastSessionActivity extends BaseActivity {
         }
 
         if (device != null) {
-            boolean ok = CastManager.setUri(device, castUrl, buildMeta(title, mime));
-            if (ok) {
-                CastManager.play(device);
-            }
-            TextView tv = findViewById(R.id.tv_status);
-            tv.setText(getString(R.string.session_casting_to) + device.name
-                    + (ok ? "" : "（" + getString(R.string.device_not_response) + "）"));
+            final CastDevice dev = device;
+            final String url = castUrl;
+            final String meta = buildMeta(title, mime);
+            new Thread(() -> {
+                boolean ok = CastManager.setUri(dev, url, meta);
+                if (ok) CastManager.play(dev);
+                runOnUiThread(() -> {
+                    TextView tv = findViewById(R.id.tv_status);
+                    tv.setText(getString(R.string.session_casting_to) + dev.name
+                            + (ok ? "" : "（" + getString(R.string.device_not_response) + "）"));
+                });
+            }, "etcas-cast").start();
         }
 
         if (isImage) {
@@ -165,7 +184,10 @@ public class CastSessionActivity extends BaseActivity {
     }
 
     private void stopCasting() {
-        if (device != null) CastManager.stop(device);
+        if (device != null) {
+            final CastDevice dev = device;
+            new Thread(() -> CastManager.stop(dev), "etcas-cast-stop").start();
+        }
         if (player != null) {
             player.stop();
             player.release();

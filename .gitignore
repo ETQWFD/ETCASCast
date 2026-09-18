@@ -4,7 +4,7 @@ app/build/
 local.properties
 .idea/
 *.iml
-keystore/
+
 demo/seg*.mp4
 demo/list.txt
 demo/frame_*.jpg

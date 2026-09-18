@@ -120,4 +120,11 @@
     <string name="cancel">キャンセル</string>
     <string name="back">戻る</string>
     <string name="tip">ヒント</string>
+    <string name="mirror_stop">ミラーリング停止</string>
+    <string name="mirror_live_hint">デバイスが画面をリアルタイムで視聴中です。ホームに戻ってスマホを引き続きお使いいただけます。</string>
+    <string name="device_search_fail">検索に失敗しました。ネットワークを確認して再試行してください。</string>
+    <string name="session_play_fail">このファイルは再生できません。形式がサポートされていない可能性があります。</string>
+    <string name="local_converting">MP4 に変換中…</string>
+    <string name="local_converted">MP4 に変換済み、投屏できます。</string>
+    <string name="local_convert_fail">変換に失敗しました。元のファイルで投屏を試みます。</string>
 </resources>

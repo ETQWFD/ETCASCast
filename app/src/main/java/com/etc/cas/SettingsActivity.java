@@ -1,6 +1,5 @@
 package com.etc.cas;
 
-import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
@@ -14,6 +13,10 @@ public class SettingsActivity extends BaseActivity {
     private View themeSea;
     private View themeOrange;
     private View themeEmerald;
+    private View themeSakuraFrame;
+    private View themeSeaFrame;
+    private View themeOrangeFrame;
+    private View themeEmeraldFrame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +27,10 @@ public class SettingsActivity extends BaseActivity {
         themeSea = findViewById(R.id.theme_sea);
         themeOrange = findViewById(R.id.theme_orange);
         themeEmerald = findViewById(R.id.theme_emerald);
+        themeSakuraFrame = findViewById(R.id.theme_sakura_frame);
+        themeSeaFrame = findViewById(R.id.theme_sea_frame);
+        themeOrangeFrame = findViewById(R.id.theme_orange_frame);
+        themeEmeraldFrame = findViewById(R.id.theme_emerald_frame);
 
         themeSakura.setOnClickListener(v -> pickTheme(Prefs.THEME_SAKURA));
         themeSea.setOnClickListener(v -> pickTheme(Prefs.THEME_SEA));
@@ -57,10 +64,10 @@ public class SettingsActivity extends BaseActivity {
 
     private void refreshState() {
         String theme = Prefs.theme(this);
-        markTheme(themeSakura, Prefs.THEME_SAKURA.equals(theme));
-        markTheme(themeSea, Prefs.THEME_SEA.equals(theme));
-        markTheme(themeOrange, Prefs.THEME_ORANGE.equals(theme));
-        markTheme(themeEmerald, Prefs.THEME_EMERALD.equals(theme));
+        markTheme(themeSakuraFrame, Prefs.THEME_SAKURA.equals(theme));
+        markTheme(themeSeaFrame, Prefs.THEME_SEA.equals(theme));
+        markTheme(themeOrangeFrame, Prefs.THEME_ORANGE.equals(theme));
+        markTheme(themeEmeraldFrame, Prefs.THEME_EMERALD.equals(theme));
 
         String mode = Prefs.mode(this);
         ThemeManager.colorChip(this, findViewById(R.id.chip_mode_light), Prefs.MODE_LIGHT.equals(mode));
@@ -74,14 +81,12 @@ public class SettingsActivity extends BaseActivity {
         ThemeManager.colorChip(this, findViewById(R.id.chip_font_jp), Prefs.FONT_JP.equals(font));
     }
 
-    private void markTheme(View circle, boolean selected) {
+    private void markTheme(View frame, boolean selected) {
         int accent = ThemeManager.accent(this);
-        circle.setBackgroundTintList(ColorStateList.valueOf(accent));
-        if (selected) {
-            circle.setPadding(dp(4), dp(4), dp(4), dp(4));
-        } else {
-            circle.setPadding(dp(0), dp(0), dp(0), dp(0));
-        }
+        android.graphics.drawable.GradientDrawable ring = new android.graphics.drawable.GradientDrawable();
+        ring.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        ring.setStroke(dp(3), selected ? accent : 0x00000000);
+        frame.setBackground(ring);
     }
 
     private int dp(int v) {

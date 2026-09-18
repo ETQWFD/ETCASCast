@@ -57,16 +57,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <View
-                    android:id="@+id/theme_sakura"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_theme_sakura"
-                    android:tag="theme_circle" />
+                <FrameLayout
+                    android:id="@+id/theme_sakura_frame"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp">
+                    <View
+                        android:id="@+id/theme_sakura"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_theme_sakura"
+                        android:tag="theme_circle" />
+                </FrameLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/theme_sakura"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
@@ -78,16 +84,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <View
-                    android:id="@+id/theme_sea"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_theme_sea"
-                    android:tag="theme_circle" />
+                <FrameLayout
+                    android:id="@+id/theme_sea_frame"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp">
+                    <View
+                        android:id="@+id/theme_sea"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_theme_sea"
+                        android:tag="theme_circle" />
+                </FrameLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/theme_sea"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
@@ -99,16 +111,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <View
-                    android:id="@+id/theme_orange"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_theme_orange"
-                    android:tag="theme_circle" />
+                <FrameLayout
+                    android:id="@+id/theme_orange_frame"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp">
+                    <View
+                        android:id="@+id/theme_orange"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_theme_orange"
+                        android:tag="theme_circle" />
+                </FrameLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/theme_orange"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />
@@ -120,16 +138,22 @@
                 android:layout_weight="1"
                 android:gravity="center"
                 android:orientation="vertical">
-                <View
-                    android:id="@+id/theme_emerald"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/bg_theme_emerald"
-                    android:tag="theme_circle" />
+                <FrameLayout
+                    android:id="@+id/theme_emerald_frame"
+                    android:layout_width="54dp"
+                    android:layout_height="54dp">
+                    <View
+                        android:id="@+id/theme_emerald"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_gravity="center"
+                        android:background="@drawable/bg_theme_emerald"
+                        android:tag="theme_circle" />
+                </FrameLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
+                    android:layout_marginTop="2dp"
                     android:text="@string/theme_emerald"
                     android:textColor="@color/text_secondary"
                     android:textSize="12sp" />

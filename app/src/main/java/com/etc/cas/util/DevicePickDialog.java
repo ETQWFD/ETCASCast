@@ -47,7 +47,19 @@ public class DevicePickDialog {
             applyState(dialog, null, true, cb);
             return dialog;
         } catch (Exception e) {
-            return null;
+            try {
+                return new AlertDialog.Builder(ctx)
+                        .setTitle(R.string.select_device_title)
+                        .setMessage(R.string.searching_text)
+                        .setCancelable(true)
+                        .setNegativeButton(R.string.cancel, null)
+                        .setNeutralButton(R.string.manual_add, (d, w) -> {
+                            if (cb != null) cb.onManual();
+                        })
+                        .show();
+            } catch (Exception e2) {
+                return null;
+            }
         }
     }
 

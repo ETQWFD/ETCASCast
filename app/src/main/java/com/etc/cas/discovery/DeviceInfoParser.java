@@ -35,6 +35,7 @@ public class DeviceInfoParser {
             String serviceType = null;
             String controlUrl = null;
             String modelName = "";
+            String deviceType = "";
 
             int event = xpp.getEventType();
             while (event != XmlPullParser.END_DOCUMENT) {
@@ -42,6 +43,8 @@ public class DeviceInfoParser {
                     String name = xpp.getName();
                     if ("friendlyName".equals(name)) {
                         d.name = safe(xpp.nextText());
+                    } else if ("deviceType".equals(name)) {
+                        deviceType = safe(xpp.nextText());
                     } else if ("modelName".equals(name)) {
                         modelName = safe(xpp.nextText());
                     } else if ("UDN".equals(name)) {
@@ -63,15 +66,21 @@ public class DeviceInfoParser {
                 event = xpp.next();
             }
 
-            if (d.name == null || d.name.isEmpty()) d.name = d.ip == null ? "Unknown Device" : d.ip;
-            d.type = classify(modelName, d.name);
-            if (d.controlUrl == null) return null;
             try {
                 URL u = new URL(location);
                 d.ip = u.getHost();
                 d.port = u.getPort() > 0 ? u.getPort() : 80;
             } catch (Exception ignored) {
             }
+            if (d.name == null || d.name.isEmpty()) d.name = d.ip == null ? "Unknown Device" : d.ip;
+            boolean basic = deviceType.toLowerCase().contains("basic:1");
+            d.dial = basic || (d.controlUrl == null && (location.toLowerCase().endsWith("/dd.xml")
+                    || location.toLowerCase().contains("dial")));
+            if (d.dial && d.ip != null) {
+                d.dialAppUrl = "http://" + d.ip + ":" + d.port + "/apps";
+            }
+            d.type = classify(modelName, d.name);
+            if (d.controlUrl == null && !d.dial) return null;
             return d;
         } catch (Exception e) {
             return null;

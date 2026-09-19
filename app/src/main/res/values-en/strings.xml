@@ -133,4 +133,12 @@
     <string name="input_ip_hint">Enter device IP or description URL (e.g. 192.168.1.100)</string>
     <string name="probing">Probing device…</string>
     <string name="confirm">OK</string>
+
+    <string name="main_features">Local Cast · Screen Mirror · Link Cast · QR Cast</string>
+    <string name="dev_tribute_entry">Credits</string>
+    <string name="dev_tribute_title">Credits</string>
+    <string name="dev_tribute_body">Developer: ETC Association\nTranslator: POAI</string>
+    <string name="version_fmt">Version %1$s</string>
+    <string name="qr_code_hint">This is a TV pairing code. Make sure your phone and TV are on the same Wi‑Fi, then tap Cast and choose your TV.</string>
+    <string name="qr_search_device">Search devices</string>
 </resources>

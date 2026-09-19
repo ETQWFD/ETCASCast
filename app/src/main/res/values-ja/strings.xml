@@ -133,4 +133,12 @@
     <string name="input_ip_hint">デバイスの IP または説明 URL を入力（例 192.168.1.100）</string>
     <string name="probing">デバイスを検出中…</string>
     <string name="confirm">OK</string>
+
+    <string name="main_features">ローカル投写 · 画面ミラー · リンク投写 · QR投写</string>
+    <string name="dev_tribute_entry">開発者クレジット</string>
+    <string name="dev_tribute_title">クレジット</string>
+    <string name="dev_tribute_body">開発者：ETC協会\n翻訳者：POAI</string>
+    <string name="version_fmt">バージョン %1$s</string>
+    <string name="qr_code_hint">これはテレビのペアリングコードです。スマホとテレビが同じ Wi‑Fi に接続されていることを確認し、「投写」からテレビを選択してください。</string>
+    <string name="qr_search_device">デバイスを検索</string>
 </resources>

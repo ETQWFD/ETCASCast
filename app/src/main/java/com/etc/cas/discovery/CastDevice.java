@@ -14,6 +14,8 @@ public class CastDevice implements Serializable {
     public String controlUrl;
     public String volumeControlUrl;
     public String iconUrl;
+    public boolean dial;
+    public String dialAppUrl;
 
     public String getInfoLine() {
         return type + " · " + ip;

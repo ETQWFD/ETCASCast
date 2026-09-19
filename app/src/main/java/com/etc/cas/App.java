@@ -1,7 +1,7 @@
 package com.etc.cas;
 
 import android.app.Application;
-import android.content.res.Configuration;
+import android.content.Context;
 
 import com.etc.cas.cast.LocalFileServer;
 
@@ -13,6 +13,12 @@ import java.util.Date;
 import java.util.Locale;
 
 public class App extends Application {
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(LocaleHelper.apply(base));
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -31,10 +37,6 @@ public class App extends Application {
         });
         ThemeManager.applyNightMode(this);
         LocalFileServer.AppHolder.init(this);
-        Configuration config = getResources().getConfiguration();
         Locale.setDefault(LocaleHelper.localeFor(Prefs.font(this)));
-        if (config.getLocales().size() > 0) {
-            Locale.setDefault(config.getLocales().get(0));
-        }
     }
 }

@@ -133,4 +133,12 @@
     <string name="input_ip_hint">輸入裝置 IP 或描述位址（如 192.168.1.100）</string>
     <string name="probing">正在探測裝置…</string>
     <string name="confirm">確定</string>
+
+    <string name="main_features">本地投屏 · 螢幕同步 · 鏈接投屏 · 掃碼投屏</string>
+    <string name="dev_tribute_entry">開發者致謝</string>
+    <string name="dev_tribute_title">致謝</string>
+    <string name="dev_tribute_body">致敬開發者：ETC協會\n翻譯者：POAI</string>
+    <string name="version_fmt">版本 %1$s</string>
+    <string name="qr_code_hint">這是電視端配對碼。請確認手機與電視連接同一 Wi‑Fi，再透過「投屏」搜尋並選擇電視裝置。</string>
+    <string name="qr_search_device">搜尋裝置</string>
 </resources>

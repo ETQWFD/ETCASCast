@@ -35,7 +35,10 @@ public class CastManager {
     }
 
     public static boolean cast(CastDevice d, String uri, String meta) {
-        if (d == null || d.controlUrl == null) return false;
+        if (d == null) return false;
+        if (d.controlUrl == null) {
+            return dialWake(d);
+        }
         soap(d.controlUrl, AVT, "Stop", "<InstanceID>0</InstanceID>");
         if (!setUri(d, uri, meta)) return false;
         try {
@@ -43,6 +46,25 @@ public class CastManager {
         } catch (InterruptedException ignored) {
         }
         return play(d);
+    }
+
+    private static boolean dialWake(CastDevice d) {
+        if (d.dialAppUrl == null || d.dialAppUrl.isEmpty()) return false;
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(d.dialAppUrl);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(4000);
+            conn.setReadTimeout(4000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "ETCASCast/1.4");
+            int code = conn.getResponseCode();
+            return code > 0 && code < 500;
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
     }
 
     public static boolean setVolume(CastDevice d, int volume) {

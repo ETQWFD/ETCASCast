@@ -44,6 +44,10 @@ public class LocalCastActivity extends BaseActivity {
         findViewById(R.id.btn_back).setOnClickListener(v -> finish());
         findViewById(R.id.btn_pick).setOnClickListener(v -> pickFile());
         findViewById(R.id.btn_cast).setOnClickListener(v -> startCastFlow());
+
+        if (getIntent() != null && getIntent().getBooleanExtra("auto_search", false)) {
+            findViewById(R.id.btn_cast).postDelayed(this::discoverAndPick, 400);
+        }
     }
 
     @Override

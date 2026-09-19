@@ -29,11 +29,13 @@ public class DeviceDiscoverer {
             "urn:schemas-upnp-org:device:MediaRenderer:1",
             "urn:schemas-upnp-org:service:AVTransport:1",
             "urn:schemas-upnp-org:service:RenderingControl:1",
+            "urn:dial-multiscreen-org:service:dial:1",
+            "urn:schemas-upnp-org:device:Basic:1",
             "upnp:rootdevice",
             "ssdp:all"
     };
     private static final String[] PROBE_PATHS = {
-            "/rootDesc.xml", "/description.xml", "/upnp/description.xml",
+            "/rootDesc.xml", "/dd.xml", "/description.xml", "/upnp/description.xml",
             "/DeviceDescription.xml", "/device/description.xml", "/rootDesc/description.xml",
             "/xml/device_description.xml", "/dmr.xml", "/devicedesc.xml"
     };
@@ -118,7 +120,8 @@ public class DeviceDiscoverer {
                     String loc = extractLocation(text);
                     if (loc != null && locations.add(loc)) {
                         parseAsync(loc, d -> {
-                            if (d != null && d.controlUrl != null && seenUrls.add(d.controlUrl)) {
+                            if (d != null && (d.controlUrl != null || d.dial)
+                                    && seenUrls.add(deviceKey(d))) {
                                 synchronized (result) {
                                     result.add(d);
                                 }
@@ -165,6 +168,13 @@ public class DeviceDiscoverer {
                 cb.onParsed(null);
             }
         }, "etcas-desc").start();
+    }
+
+    private static String deviceKey(CastDevice d) {
+        if (d.udn != null && !d.udn.isEmpty()) return d.udn;
+        if (d.controlUrl != null && !d.controlUrl.isEmpty()) return d.controlUrl;
+        if (d.dialAppUrl != null && !d.dialAppUrl.isEmpty()) return d.dialAppUrl;
+        return d.location != null ? d.location : (d.ip + ":" + d.port);
     }
 
     private String extractLocation(String text) {

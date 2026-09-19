@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -15,14 +16,19 @@ import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class QrScanActivity extends BaseActivity {
 
     private static final int REQ_CAMERA = 300;
+    private static final Pattern URL_PATTERN =
+            Pattern.compile("https?://[^\\s]+", Pattern.CASE_INSENSITIVE);
 
     private DecoratedBarcodeView barcodeView;
     private boolean cameraActive;
     private boolean launched;
+    private boolean hintShown;
 
     private final BarcodeCallback callback = new BarcodeCallback() {
         @Override
@@ -75,19 +81,62 @@ public class QrScanActivity extends BaseActivity {
         cameraActive = false;
     }
 
+    private String extractUrl(String raw) {
+        if (raw == null) return null;
+        String value = raw.trim();
+        Matcher m = URL_PATTERN.matcher(value);
+        if (m.find()) {
+            String u = m.group().trim();
+            while (u.endsWith(".") || u.endsWith("，") || u.endsWith("。") || u.endsWith(",") || u.endsWith(")") || u.endsWith("）")) {
+                u = u.substring(0, u.length() - 1);
+            }
+            return u;
+        }
+        String compact = value.replaceAll("\\s+", "");
+        if (compact.startsWith("www.")) {
+            return "https://" + compact;
+        }
+        if (!compact.contains("://") && compact.matches("[A-Za-z0-9.-]+\\.[A-Za-z]{2,}(/.*)?")) {
+            return "https://" + compact;
+        }
+        return null;
+    }
+
     private void handleResult(String text) {
         if (launched) return;
-        String value = text.trim();
-        if (value.startsWith("http://") || value.startsWith("https://")) {
+        String url = extractUrl(text);
+        if (url != null) {
             launched = true;
             stopCamera();
             Intent i = new Intent(this, LinkCastActivity.class);
-            i.putExtra("url", value);
+            i.putExtra("url", url);
             startActivity(i);
             finish();
         } else {
-            Toast.makeText(this, R.string.qr_result_invalid, Toast.LENGTH_SHORT).show();
+            showPairingHint();
         }
+    }
+
+    private void showPairingHint() {
+        if (hintShown) return;
+        hintShown = true;
+        stopCamera();
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.qr_title)
+                .setMessage(R.string.qr_code_hint)
+                .setCancelable(false)
+                .setNegativeButton(R.string.cancel, (d, w) -> {
+                    hintShown = false;
+                    if (hasCameraPermission()) startCamera();
+                })
+                .setPositiveButton(R.string.qr_search_device, (d, w) -> {
+                    launched = true;
+                    Intent i = new Intent(this, LocalCastActivity.class);
+                    i.putExtra("auto_search", true);
+                    startActivity(i);
+                    finish();
+                })
+                .show();
     }
 
     @Override

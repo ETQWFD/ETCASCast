@@ -1,7 +1,11 @@
 package com.etc.cas;
 
+import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +56,10 @@ public class SettingsActivity extends BaseActivity {
                 UpdateChecker.check(this));
 
         findViewById(R.id.row_license).setOnClickListener(v -> showLicense());
+        findViewById(R.id.row_tribute).setOnClickListener(v -> showTribute());
+
+        ((TextView) findViewById(R.id.tv_dev_version))
+                .setText(getString(R.string.version_fmt, BuildConfig.VERSION_NAME));
     }
 
     @Override
@@ -107,7 +115,45 @@ public class SettingsActivity extends BaseActivity {
 
     private void pickFont(String font) {
         Prefs.setFont(this, font);
-        recreate();
+        Intent i = new Intent(this, MainActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(i);
+        finish();
+    }
+
+    private void showTribute() {
+        float d = getResources().getDisplayMetrics().density;
+        LinearLayout box = new LinearLayout(this);
+        box.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int) (d * 22);
+        box.setPadding(pad, (int) (d * 18), pad, 0);
+
+        TextView title = new TextView(this);
+        title.setText(R.string.dev_tribute_title);
+        title.setTextColor(getColor(R.color.text_primary));
+        title.setTextSize(18);
+        title.setTypeface(title.getTypeface(), Typeface.BOLD);
+        box.addView(title);
+
+        TextView body = new TextView(this);
+        body.setText(R.string.dev_tribute_body);
+        body.setTextColor(getColor(R.color.text_primary));
+        body.setTextSize(15);
+        body.setLineSpacing(d * 4, 1f);
+        LinearLayout.LayoutParams bp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        bp.topMargin = (int) (d * 12);
+        body.setLayoutParams(bp);
+        box.addView(body);
+
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setView(box)
+                .setPositiveButton(R.string.confirm, null)
+                .create();
+        dialog.show();
+        FontManager.apply(box, this);
+        Button btn = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
+        if (btn != null) FontManager.apply(btn, this);
     }
 
     private void showLicense() {

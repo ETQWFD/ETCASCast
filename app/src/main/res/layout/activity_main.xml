@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:text="本地投屏 · 屏幕同步 · 链接投屏 · 扫码投屏"
+                android:text="@string/main_features"
                 android:textColor="#D9FFFFFF"
                 android:textSize="13sp" />
         </LinearLayout>

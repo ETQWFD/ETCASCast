@@ -5,6 +5,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
@@ -13,6 +14,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -34,10 +36,12 @@ public class MirrorService extends Service {
 
     @Override
     public void onCreate() {
-        NotificationChannel channel = new NotificationChannel("mirror", getString(R.string.mirror_title),
-                NotificationManager.IMPORTANCE_LOW);
-        NotificationManager nm = getSystemService(NotificationManager.class);
-        nm.createNotificationChannel(channel);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel("mirror", getString(R.string.mirror_title),
+                    NotificationManager.IMPORTANCE_LOW);
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            nm.createNotificationChannel(channel);
+        }
     }
 
     @Override
@@ -46,12 +50,22 @@ public class MirrorService extends Service {
             stopSelf();
             return START_NOT_STICKY;
         }
-        Notification notification = new Notification.Builder(this, "mirror")
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, "mirror");
+        } else {
+            builder = new Notification.Builder(this);
+        }
+        Notification notification = builder
                 .setContentTitle(getString(R.string.mirror_title))
                 .setContentText(getString(R.string.mirror_running))
                 .setSmallIcon(R.drawable.ic_cast)
                 .build();
-        startForeground(1, notification);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+        } else {
+            startForeground(1, notification);
+        }
         int code = intent.getIntExtra("code", 0);
         Intent data = intent.getParcelableExtra("data");
         startCapture(code, data);
@@ -62,14 +76,26 @@ public class MirrorService extends Service {
         try {
             MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
             projection = mpm.getMediaProjection(code, data);
+            if (projection == null) {
+                stopSelf();
+                return;
+            }
+            projection.registerCallback(new MediaProjection.Callback() {
+                @Override
+                public void onStop() {
+                    stopSelf();
+                }
+            }, new Handler(getMainLooper()));
             int w = getResources().getDisplayMetrics().widthPixels;
             int h = getResources().getDisplayMetrics().heightPixels;
             int dpi = getResources().getDisplayMetrics().densityDpi;
             encodeThread = new HandlerThread("etcas-mirror");
             encodeThread.start();
             encodeHandler = new Handler(encodeThread.getLooper());
-            imageReader = ImageReader.newInstance(w, h, PixelFormat.RGBA_8888, 2);
-            vd = projection.createVirtualDisplay("ETCASMirror", w, h, dpi,
+            int capW = Math.min(w, 1280);
+            int capH = (int) ((long) capW * h / Math.max(w, 1));
+            imageReader = ImageReader.newInstance(capW, capH, PixelFormat.RGBA_8888, 2);
+            vd = projection.createVirtualDisplay("ETCASMirror", capW, capH, dpi,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
                     imageReader.getSurface(), null, encodeHandler);
             imageReader.setOnImageAvailableListener(reader -> {
@@ -77,10 +103,10 @@ public class MirrorService extends Service {
                 try {
                     image = reader.acquireLatestImage();
                     if (image == null) return;
-                    Bitmap frame = toBitmap(image, w, h);
+                    Bitmap frame = toBitmap(image, capW, capH);
                     if (frame == null) return;
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    frame.compress(Bitmap.CompressFormat.JPEG, 72, bos);
+                    frame.compress(Bitmap.CompressFormat.JPEG, 60, bos);
                     frame.recycle();
                     LocalFileServer.setFrame(bos.toByteArray());
                 } catch (Exception ignored) {

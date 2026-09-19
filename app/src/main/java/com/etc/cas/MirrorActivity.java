@@ -73,7 +73,11 @@ public class MirrorActivity extends BaseActivity {
         i.putExtra("code", code);
         i.putExtra("data", data);
         try {
-            startForegroundService(i);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                startForegroundService(i);
+            } else {
+                startService(i);
+            }
         } catch (Exception e) {
             Toast.makeText(this, R.string.mirror_permission_denied, Toast.LENGTH_SHORT).show();
             return;
@@ -101,9 +105,9 @@ public class MirrorActivity extends BaseActivity {
         try {
             AlertDialog dialog = DevicePickDialog.show(this, null, callback());
             if (dialog == null) return;
-            new DeviceDiscoverer().start(this, devices -> runOnUiThread(() -> {
+            new DeviceDiscoverer().start(this, (devices, stillSearching) -> runOnUiThread(() -> {
                 try {
-                    DevicePickDialog.update(dialog, devices, callback());
+                    DevicePickDialog.update(dialog, devices, stillSearching, callback());
                 } catch (Exception ignored) {
                 }
             }));
@@ -148,7 +152,7 @@ public class MirrorActivity extends BaseActivity {
                     String ip = input.getText().toString().trim();
                     if (ip.isEmpty()) return;
                     Toast.makeText(this, R.string.probing, Toast.LENGTH_SHORT).show();
-                    new DeviceDiscoverer().probeIp(this, ip, devices -> runOnUiThread(() -> {
+                    new DeviceDiscoverer().probeIp(this, ip, (devices, stillSearching) -> runOnUiThread(() -> {
                         if (devices == null || devices.isEmpty()) {
                             Toast.makeText(MirrorActivity.this, R.string.device_search_fail, Toast.LENGTH_SHORT).show();
                         } else {

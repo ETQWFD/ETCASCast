@@ -34,6 +34,7 @@ public class DeviceInfoParser {
 
             String serviceType = null;
             String controlUrl = null;
+            String modelName = "";
 
             int event = xpp.getEventType();
             while (event != XmlPullParser.END_DOCUMENT) {
@@ -42,8 +43,7 @@ public class DeviceInfoParser {
                     if ("friendlyName".equals(name)) {
                         d.name = safe(xpp.nextText());
                     } else if ("modelName".equals(name)) {
-                        String model = safe(xpp.nextText());
-                        d.type = classify(model, d.name);
+                        modelName = safe(xpp.nextText());
                     } else if ("UDN".equals(name)) {
                         d.udn = safe(xpp.nextText());
                     } else if ("serviceType".equals(name)) {
@@ -56,13 +56,15 @@ public class DeviceInfoParser {
                             d.volumeControlUrl = resolve(location, controlUrl);
                         }
                         serviceType = null;
+                    } else if ("url".equals(name) && d.iconUrl == null) {
+                        d.iconUrl = resolve(location, safe(xpp.nextText()));
                     }
                 }
                 event = xpp.next();
             }
 
             if (d.name == null || d.name.isEmpty()) d.name = d.ip == null ? "Unknown Device" : d.ip;
-            if (d.type == null) d.type = "DLNA Device";
+            d.type = classify(modelName, d.name);
             if (d.controlUrl == null) return null;
             try {
                 URL u = new URL(location);
@@ -92,9 +94,12 @@ public class DeviceInfoParser {
 
     private static String classify(String model, String name) {
         String t = (model + " " + name).toLowerCase();
-        if (t.contains("bilibili") || t.contains("哔哩")) return "哔哩哔哩设备";
-        if (t.contains("youku") || t.contains("酷喵") || t.contains("cibn")) return "酷喵设备";
-        if (t.contains("mango") || t.contains("芒果")) return "芒果设备";
+        if (t.contains("bilibili") || t.contains("哔哩") || t.contains("小电视") || t.contains("云视听")) return "哔哩哔哩 · 云视听小电视";
+        if (t.contains("youku") || t.contains("酷喵") || t.contains("cibn") || t.contains("优酷")) return "酷喵 · 优酷 TV";
+        if (t.contains("mango") || t.contains("芒果") || t.contains("mgtv")) return "芒果 TV 设备";
+        if (t.contains("iqiyi") || t.contains("奇异果") || t.contains("爱奇艺")) return "银河奇异果设备";
+        if (t.contains("极光") || t.contains("newtv") || t.contains("未来电视")) return "云视听极光设备";
+        if (t.contains("lebo") || t.contains("乐播")) return "乐播投屏设备";
         if (t.contains("hisense") || t.contains("海信")) return "海信智能电视";
         if (t.contains("tcl") || t.contains("雷鸟")) return "TCL 智能电视";
         if (t.contains("sony") || t.contains("索尼")) return "索尼智能电视";

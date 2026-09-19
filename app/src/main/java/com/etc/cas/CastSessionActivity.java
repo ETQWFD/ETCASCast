@@ -160,8 +160,7 @@ public class CastSessionActivity extends BaseActivity {
             final String url = castUrl;
             final String meta = buildMeta(title, mime);
             new Thread(() -> {
-                boolean ok = CastManager.setUri(dev, url, meta);
-                if (ok) CastManager.play(dev);
+                boolean ok = CastManager.cast(dev, url, meta);
                 runOnUiThread(() -> {
                     TextView tv = findViewById(R.id.tv_status);
                     tv.setText(getString(R.string.session_casting_to) + dev.name

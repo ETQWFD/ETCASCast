@@ -43,7 +43,7 @@ public class DevicePickDialog {
                 dialog.dismiss();
                 if (cb != null) cb.onManual();
             });
-            applyState(dialog, devices, cb);
+            applyState(dialog, null, true, cb);
             dialog.show();
             return dialog;
         } catch (Exception e) {
@@ -51,19 +51,17 @@ public class DevicePickDialog {
         }
     }
 
-    public static void update(AlertDialog dialog, List<CastDevice> devices, Callback cb) {
+    public static void update(AlertDialog dialog, List<CastDevice> devices, boolean stillSearching, Callback cb) {
         if (dialog == null || !dialog.isShowing()) return;
-        applyState(dialog, devices, cb);
+        applyState(dialog, devices, stillSearching, cb);
     }
 
-    private static void applyState(AlertDialog dialog, List<CastDevice> devices, Callback cb) {
+    private static void applyState(AlertDialog dialog, List<CastDevice> devices, boolean stillSearching, Callback cb) {
         Context ctx = dialog.getContext();
         ListView list = dialog.findViewById(R.id.list_devices);
         ProgressBar spinner = dialog.findViewById(R.id.pb_search);
         TextView tvSearching = dialog.findViewById(R.id.tv_searching);
         View panelEmpty = dialog.findViewById(R.id.panel_empty);
-        TextView tvEmpty = dialog.findViewById(R.id.tv_empty);
-        TextView tvHint = dialog.findViewById(R.id.tv_hint);
         MaterialButton btnRefresh = dialog.findViewById(R.id.btn_refresh);
         ImageView icon = dialog.findViewById(R.id.iv_dialog_icon);
 
@@ -73,15 +71,15 @@ public class DevicePickDialog {
         btnRefresh.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(R.color.surface)));
         btnRefresh.setTextColor(ctx.getColor(R.color.text_primary));
 
-        boolean searching = devices == null;
-        boolean empty = !searching && devices.isEmpty();
+        boolean hasDevices = devices != null && !devices.isEmpty();
+        boolean empty = !stillSearching && !hasDevices;
 
-        spinner.setVisibility(searching ? View.VISIBLE : View.GONE);
-        tvSearching.setVisibility(searching ? View.VISIBLE : View.GONE);
+        spinner.setVisibility(stillSearching ? View.VISIBLE : View.GONE);
+        tvSearching.setVisibility(stillSearching ? View.VISIBLE : View.GONE);
         panelEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
-        btnRefresh.setVisibility(searching ? View.GONE : View.VISIBLE);
-        list.setVisibility(searching || empty ? View.GONE : View.VISIBLE);
-        if (devices != null) {
+        btnRefresh.setVisibility(stillSearching ? View.GONE : View.VISIBLE);
+        list.setVisibility(hasDevices ? View.VISIBLE : View.GONE);
+        if (hasDevices) {
             DeviceAdapter adapter = new DeviceAdapter(ctx, devices);
             list.setAdapter(adapter);
             list.setOnItemClickListener((parent, view, position, id) -> {

@@ -20,7 +20,7 @@ import java.util.Set;
 public class DeviceDiscoverer {
 
     public interface Listener {
-        void onDevices(List<CastDevice> devices);
+        void onDevices(List<CastDevice> devices, boolean stillSearching);
     }
 
     private static final String SSDP_ADDR = "239.255.255.250";
@@ -28,38 +28,44 @@ public class DeviceDiscoverer {
     private static final String[] SEARCH_TARGETS = {
             "urn:schemas-upnp-org:device:MediaRenderer:1",
             "urn:schemas-upnp-org:service:AVTransport:1",
+            "urn:schemas-upnp-org:service:RenderingControl:1",
+            "upnp:rootdevice",
             "ssdp:all"
     };
     private static final String[] PROBE_PATHS = {
             "/rootDesc.xml", "/description.xml", "/upnp/description.xml",
-            "/DeviceDescription.xml", "/device/description.xml", "/rootDesc/description.xml"
+            "/DeviceDescription.xml", "/device/description.xml", "/rootDesc/description.xml",
+            "/xml/device_description.xml", "/dmr.xml", "/devicedesc.xml"
     };
-    private static final int[] PROBE_PORTS = {80, 1900, 8080, 8060, 9000, 49152, 49153, 49154, 36666, 5000};
+    private static final int[] PROBE_PORTS = {80, 8080, 8060, 9000, 49152, 49153, 49154, 49155, 36666, 5000, 1900, 52235};
 
     private final Handler main = new Handler(Looper.getMainLooper());
 
     public void start(Context ctx, Listener listener) {
-        new Thread(() -> {
-            List<CastDevice> devices = discover(ctx);
-            main.post(() -> listener.onDevices(devices));
-        }, "etcas-discover").start();
+        final Context app = ctx.getApplicationContext();
+        new Thread(() -> discover(app, listener), "etcas-discover").start();
     }
 
     public void probeIp(Context ctx, final String ip, Listener listener) {
+        final Context app = ctx.getApplicationContext();
         new Thread(() -> {
-            List<CastDevice> found = new ArrayList<>();
+            List<CastDevice> all = new ArrayList<>();
+            post(listener, all, true);
             CastDevice d = probeOne(ip);
-            if (d != null) found.add(d);
-            final List<CastDevice> result = found;
-            main.post(() -> listener.onDevices(result));
+            if (d != null) {
+                all.add(d);
+                post(listener, all, true);
+            }
+            post(listener, all, false);
         }, "etcas-probe").start();
     }
 
-    private List<CastDevice> discover(Context ctx) {
-        WifiManager wm = (WifiManager) ctx.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+    private void discover(Context ctx, Listener listener) {
+        WifiManager wm = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
         WifiManager.MulticastLock lock = null;
         MulticastSocket socket = null;
-        List<CastDevice> result = new ArrayList<>();
+        final List<CastDevice> result = new ArrayList<>();
+        final Set<String> seenUrls = new LinkedHashSet<>();
         try {
             if (wm != null) {
                 lock = wm.createMulticastLock("etcas-ssdp");
@@ -70,29 +76,24 @@ public class DeviceDiscoverer {
             socket = new MulticastSocket(null);
             socket.setReuseAddress(true);
             socket.bind(new InetSocketAddress(0));
-            socket.setSoTimeout(1500);
+            socket.setSoTimeout(1000);
 
             InetAddress group = InetAddress.getByName(SSDP_ADDR);
             NetworkInterface nif = multicastInterface();
-            if (nif != null) {
-                try {
-                    socket.joinGroup(new InetSocketAddress(group, SSDP_PORT), nif);
-                } catch (IOException ignored) {
-                }
-            } else {
-                try {
-                    socket.joinGroup(group);
-                } catch (IOException ignored) {
-                }
+            try {
+                if (nif != null) socket.joinGroup(new InetSocketAddress(group, SSDP_PORT), nif);
+                else socket.joinGroup(group);
+            } catch (IOException ignored) {
             }
 
-            Set<String> seen = new LinkedHashSet<>();
+            post(listener, result, true);
 
-            long end = System.currentTimeMillis() + 10000;
+            final Set<String> locations = new LinkedHashSet<>();
+            long end = System.currentTimeMillis() + 12000;
             long lastSend = 0;
 
             while (System.currentTimeMillis() < end) {
-                if (System.currentTimeMillis() - lastSend > 1200) {
+                if (System.currentTimeMillis() - lastSend > 1500) {
                     for (String st : SEARCH_TARGETS) {
                         String msg = "M-SEARCH * HTTP/1.1\r\n"
                                 + "HOST: " + SSDP_ADDR + ":" + SSDP_PORT + "\r\n"
@@ -114,25 +115,25 @@ public class DeviceDiscoverer {
                     DatagramPacket p = new DatagramPacket(buf, buf.length);
                     socket.receive(p);
                     String text = new String(p.getData(), 0, p.getLength(), "UTF-8");
-                    for (String line : text.split("\r?\n")) {
-                        int idx = line.toLowerCase().indexOf("location:");
-                        if (idx >= 0) {
-                            String url = line.substring(idx + 9).trim();
-                            if (url.startsWith("http")) seen.add(url);
-                        }
+                    String loc = extractLocation(text);
+                    if (loc != null && locations.add(loc)) {
+                        parseAsync(loc, d -> {
+                            if (d != null && d.controlUrl != null && seenUrls.add(d.controlUrl)) {
+                                synchronized (result) {
+                                    result.add(d);
+                                }
+                                post(listener, snapshot(result), true);
+                            }
+                        });
                     }
                 } catch (SocketTimeoutException ignored) {
                 }
             }
 
-            int count = 0;
-            for (String loc : seen) {
-                if (count >= 20) break;
-                CastDevice d = DeviceInfoParser.parse(loc);
-                if (d != null && !containsUrl(result, d.controlUrl)) {
-                    result.add(d);
-                    count++;
-                }
+            try {
+                if (nif != null) socket.leaveGroup(new InetSocketAddress(group, SSDP_PORT), nif);
+                else socket.leaveGroup(group);
+            } catch (Exception ignored) {
             }
         } catch (Exception ignored) {
         } finally {
@@ -145,18 +146,43 @@ public class DeviceDiscoverer {
             } catch (Exception ignored) {
             }
         }
-        return result;
+        try {
+            Thread.sleep(1500);
+        } catch (InterruptedException ignored) {
+        }
+        post(listener, snapshot(result), false);
     }
 
-    private CastDevice probeOne(String ip) {
-        String clean = ip.trim();
-        if (clean.startsWith("http://") || clean.startsWith("https://")) {
+    private interface ParseCallback {
+        void onParsed(CastDevice d);
+    }
+
+    private void parseAsync(final String location, final ParseCallback cb) {
+        new Thread(() -> {
             try {
-                java.net.URL u = new java.net.URL(clean);
-                return DeviceInfoParser.parse(u.toString());
-            } catch (Exception ignored) {
-                return null;
+                cb.onParsed(DeviceInfoParser.parse(location));
+            } catch (Exception e) {
+                cb.onParsed(null);
             }
+        }, "etcas-desc").start();
+    }
+
+    private String extractLocation(String text) {
+        for (String line : text.split("\r?\n")) {
+            String l = line.toLowerCase();
+            int idx = l.indexOf("location:");
+            if (idx >= 0) {
+                String url = line.substring(idx + 9).trim();
+                if (url.startsWith("http")) return url;
+            }
+        }
+        return null;
+    }
+
+    private CastDevice probeOne(String input) {
+        String clean = input.trim();
+        if (clean.startsWith("http://") || clean.startsWith("https://")) {
+            return DeviceInfoParser.parse(clean);
         }
         int colon = clean.indexOf(':');
         String host = colon > 0 ? clean.substring(0, colon) : clean;
@@ -169,19 +195,22 @@ public class DeviceDiscoverer {
         return null;
     }
 
-    private static boolean containsUrl(List<CastDevice> list, String url) {
-        if (url == null) return false;
-        for (CastDevice d : list) {
-            if (url.equals(d.controlUrl)) return true;
+    private static List<CastDevice> snapshot(List<CastDevice> src) {
+        List<CastDevice> copy = new ArrayList<>();
+        synchronized (src) {
+            copy.addAll(src);
         }
-        return false;
+        return copy;
+    }
+
+    private void post(final Listener listener, final List<CastDevice> devices, final boolean searching) {
+        main.post(() -> listener.onDevices(new ArrayList<>(devices), searching));
     }
 
     private static NetworkInterface multicastInterface() {
         try {
             for (NetworkInterface ni : java.util.Collections.list(NetworkInterface.getNetworkInterfaces())) {
-                if (!ni.isUp() || ni.isLoopback()) continue;
-                if (!ni.supportsMulticast()) continue;
+                if (!ni.isUp() || ni.isLoopback() || !ni.supportsMulticast()) continue;
                 String name = ni.getName().toLowerCase();
                 if (name.startsWith("wlan") || name.startsWith("wifi") || name.startsWith("ap") || name.startsWith("eth")) {
                     return ni;

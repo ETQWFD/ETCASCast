@@ -182,9 +182,9 @@ public class LocalCastActivity extends BaseActivity {
         try {
             AlertDialog dialog = DevicePickDialog.show(this, null, callback());
             if (dialog == null) return;
-            new DeviceDiscoverer().start(this, devices -> runOnUiThread(() -> {
+            new DeviceDiscoverer().start(this, (devices, stillSearching) -> runOnUiThread(() -> {
                 try {
-                    DevicePickDialog.update(dialog, devices, callback());
+                    DevicePickDialog.update(dialog, devices, stillSearching, callback());
                 } catch (Exception ignored) {
                 }
             }));
@@ -230,7 +230,7 @@ public class LocalCastActivity extends BaseActivity {
                     String ip = input.getText().toString().trim();
                     if (ip.isEmpty()) return;
                     Toast.makeText(this, R.string.probing, Toast.LENGTH_SHORT).show();
-                    new DeviceDiscoverer().probeIp(this, ip, devices -> runOnUiThread(() -> {
+                    new DeviceDiscoverer().probeIp(this, ip, (devices, stillSearching) -> runOnUiThread(() -> {
                         if (devices == null || devices.isEmpty()) {
                             Toast.makeText(LocalCastActivity.this, R.string.device_search_fail, Toast.LENGTH_SHORT).show();
                         } else {

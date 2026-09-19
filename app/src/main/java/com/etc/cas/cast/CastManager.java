@@ -15,9 +15,10 @@ public class CastManager {
     private static final String REND = "urn:schemas-upnp-org:service:RenderingControl:1";
 
     public static boolean setUri(CastDevice d, String uri, String meta) {
+        String safeUri = uri == null ? "" : uri.replace("&", "&amp;");
         String args = "<InstanceID>0</InstanceID>"
-                + "<CurrentURI>" + xmlEscape(uri) + "</CurrentURI>"
-                + "<CurrentURIMetaData>" + xmlEscape(meta == null ? "" : meta) + "</CurrentURIMetaData>";
+                + "<CurrentURI>" + safeUri + "</CurrentURI>"
+                + "<CurrentURIMetaData>" + (meta == null ? "" : meta) + "</CurrentURIMetaData>";
         return soap(d.controlUrl, AVT, "SetAVTransportURI", args);
     }
 
@@ -31,6 +32,17 @@ public class CastManager {
 
     public static boolean stop(CastDevice d) {
         return soap(d.controlUrl, AVT, "Stop", "<InstanceID>0</InstanceID>");
+    }
+
+    public static boolean cast(CastDevice d, String uri, String meta) {
+        if (d == null || d.controlUrl == null) return false;
+        soap(d.controlUrl, AVT, "Stop", "<InstanceID>0</InstanceID>");
+        if (!setUri(d, uri, meta)) return false;
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ignored) {
+        }
+        return play(d);
     }
 
     public static boolean setVolume(CastDevice d, int volume) {
@@ -53,11 +65,12 @@ public class CastManager {
 
             URL url = new URL(controlUrl);
             conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(4000);
-            conn.setReadTimeout(4000);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "text/xml; charset=\"utf-8\"");
             conn.setRequestProperty("SOAPACTION", "\"" + service + "#" + action + "\"");
+            conn.setRequestProperty("Connection", "close");
             conn.setDoOutput(true);
 
             byte[] data = body.getBytes(StandardCharsets.UTF_8);
@@ -76,7 +89,12 @@ public class CastManager {
                 in.close();
                 String resp = bos.toString("UTF-8");
                 if (code == 200) {
-                    return resp.isEmpty() || resp.contains("200 OK") || resp.contains(":Response");
+                    if (resp.isEmpty()) return true;
+                    String low = resp.toLowerCase();
+                    if (low.contains("errorcode") || (low.contains("fault") && !low.contains(":response"))) {
+                        return false;
+                    }
+                    return true;
                 }
                 return false;
             }
@@ -86,14 +104,5 @@ public class CastManager {
         } finally {
             if (conn != null) conn.disconnect();
         }
-    }
-
-    private static String xmlEscape(String s) {
-        if (s == null) return "";
-        return s.replace("&", "&amp;")
-                .replace("<", "&lt;")
-                .replace(">", "&gt;")
-                .replace("\"", "&quot;")
-                .replace("'", "&apos;");
     }
 }

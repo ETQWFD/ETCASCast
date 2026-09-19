@@ -20,6 +20,7 @@ public class MirrorActivity extends BaseActivity {
     private static final int REQ_PROJECTION = 200;
 
     private boolean mirroring;
+    private CastDevice pendingDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,13 +35,7 @@ public class MirrorActivity extends BaseActivity {
                 requestProjection();
             }
         });
-        findViewById(R.id.btn_cast).setOnClickListener(v -> {
-            if (!mirroring) {
-                Toast.makeText(this, R.string.mirror_permission_denied, Toast.LENGTH_SHORT).show();
-            } else {
-                ensureWifiPermission(this::discoverAndPick);
-            }
-        });
+        findViewById(R.id.btn_cast).setOnClickListener(v -> discoverAndPick());
     }
 
     @Override
@@ -90,6 +85,12 @@ public class MirrorActivity extends BaseActivity {
         TextView url = findViewById(R.id.tv_mirror_url);
         url.setVisibility(View.VISIBLE);
         url.setText(getString(R.string.mirror_browser_hint) + "\n" + LocalFileServer.mirrorPageUrl(this));
+
+        if (pendingDevice != null) {
+            CastDevice d = pendingDevice;
+            pendingDevice = null;
+            showConnected(d);
+        }
     }
 
     private void stopMirror() {
@@ -116,17 +117,26 @@ public class MirrorActivity extends BaseActivity {
         }
     }
 
+    private void showConnected(CastDevice d) {
+        String url = LocalFileServer.mirrorPageUrl(MirrorActivity.this);
+        new AlertDialog.Builder(MirrorActivity.this)
+                .setTitle(R.string.device_connected)
+                .setMessage(getString(R.string.session_casting_to) + " " + d.name + "\n\n"
+                        + getString(R.string.mirror_browser_hint) + "\n" + url)
+                .setPositiveButton(R.string.ok, null)
+                .show();
+    }
+
     private DevicePickDialog.Callback callback() {
         return new DevicePickDialog.Callback() {
             @Override
             public void onPick(CastDevice d) {
-                String url = LocalFileServer.mirrorPageUrl(MirrorActivity.this);
-                new AlertDialog.Builder(MirrorActivity.this)
-                        .setTitle(R.string.device_connected)
-                        .setMessage(getString(R.string.session_casting_to) + " " + d.name + "\n\n"
-                                + getString(R.string.mirror_browser_hint) + "\n" + url)
-                        .setPositiveButton(R.string.ok, null)
-                        .show();
+                if (!mirroring) {
+                    pendingDevice = d;
+                    requestProjection();
+                } else {
+                    showConnected(d);
+                }
             }
 
             @Override

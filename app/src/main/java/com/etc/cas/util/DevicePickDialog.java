@@ -43,8 +43,8 @@ public class DevicePickDialog {
                 dialog.dismiss();
                 if (cb != null) cb.onManual();
             });
-            applyState(dialog, null, true, cb);
             dialog.show();
+            applyState(dialog, null, true, cb);
             return dialog;
         } catch (Exception e) {
             return null;
@@ -66,20 +66,22 @@ public class DevicePickDialog {
         ImageView icon = dialog.findViewById(R.id.iv_dialog_icon);
 
         int accent = ThemeManager.accent(ctx);
-        icon.setColorFilter(accent);
-        spinner.setIndeterminateTintList(ColorStateList.valueOf(accent));
-        btnRefresh.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(R.color.surface)));
-        btnRefresh.setTextColor(ctx.getColor(R.color.text_primary));
+        if (icon != null) icon.setColorFilter(accent);
+        if (spinner != null) spinner.setIndeterminateTintList(ColorStateList.valueOf(accent));
+        if (btnRefresh != null) {
+            btnRefresh.setBackgroundTintList(ColorStateList.valueOf(ctx.getColor(R.color.surface)));
+            btnRefresh.setTextColor(ctx.getColor(R.color.text_primary));
+        }
 
         boolean hasDevices = devices != null && !devices.isEmpty();
         boolean empty = !stillSearching && !hasDevices;
 
-        spinner.setVisibility(stillSearching ? View.VISIBLE : View.GONE);
-        tvSearching.setVisibility(stillSearching ? View.VISIBLE : View.GONE);
-        panelEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
-        btnRefresh.setVisibility(stillSearching ? View.GONE : View.VISIBLE);
-        list.setVisibility(hasDevices ? View.VISIBLE : View.GONE);
-        if (hasDevices) {
+        if (spinner != null) spinner.setVisibility(stillSearching ? View.VISIBLE : View.GONE);
+        if (tvSearching != null) tvSearching.setVisibility(stillSearching ? View.VISIBLE : View.GONE);
+        if (panelEmpty != null) panelEmpty.setVisibility(empty ? View.VISIBLE : View.GONE);
+        if (btnRefresh != null) btnRefresh.setVisibility(stillSearching ? View.GONE : View.VISIBLE);
+        if (list != null) list.setVisibility(hasDevices ? View.VISIBLE : View.GONE);
+        if (hasDevices && list != null) {
             DeviceAdapter adapter = new DeviceAdapter(ctx, devices);
             list.setAdapter(adapter);
             list.setOnItemClickListener((parent, view, position, id) -> {
@@ -89,7 +91,7 @@ public class DevicePickDialog {
             });
         }
 
-        btnRefresh.setOnClickListener(v -> {
+        if (btnRefresh != null) btnRefresh.setOnClickListener(v -> {
             dialog.dismiss();
             if (cb != null) cb.onRefresh();
         });

@@ -111,6 +111,8 @@
     <string name="qr_title">掃碼投屏</string>
     <string name="qr_hint">掃描投屏二維碼（支援嗶哩嗶哩 / 酷喵 / 芒果等投屏碼）</string>
     <string name="qr_result_invalid">未識別到有效的投屏連結</string>
+    <string name="qr_camera_denied">需要相機權限才能掃碼，請到系統設定開啟</string>
+    <string name="qr_camera_error">無法開啟相機，請確認相機未被佔用</string>
 
     <string name="permission_wifi_title">需要附近裝置權限</string>
     <string name="permission_wifi_msg">用於搜尋同一 Wi-Fi 下的投屏裝置</string>

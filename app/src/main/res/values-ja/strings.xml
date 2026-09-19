@@ -111,6 +111,8 @@
     <string name="qr_title">QR投写</string>
     <string name="qr_hint">投写QRコードをスキャン（ビリビリ / 酷喵 / 芒果TVなど対応）</string>
     <string name="qr_result_invalid">有効な投写リンクが見つかりません</string>
+    <string name="qr_camera_denied">スキャンにはカメラ権限が必要です。システム設定で有効にしてください。</string>
+    <string name="qr_camera_error">カメラを開けません。他のアプリが使用中でないか確認してください。</string>
 
     <string name="permission_wifi_title">周辺端末の権限が必要です</string>
     <string name="permission_wifi_msg">同じWi-Fi内の投写端末を探すために使用します</string>

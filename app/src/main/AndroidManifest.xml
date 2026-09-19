@@ -71,8 +71,7 @@
         <activity
             android:name=".QrScanActivity"
             android:exported="false"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.NoActionBar" />
+            android:screenOrientation="portrait" />
 
         <service
             android:name=".MirrorService"

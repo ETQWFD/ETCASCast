@@ -3,13 +3,10 @@ package com.etc.cas;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
 
 import com.etc.cas.util.VolumeDialog;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 
 public class MainActivity extends BaseActivity {
 
@@ -77,27 +74,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void scanQr() {
-        new IntentIntegrator(this)
-                .setCaptureActivity(QrScanActivity.class)
-                .setPrompt(getString(R.string.qr_hint))
-                .setOrientationLocked(true)
-                .initiateScan();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
-        if (result != null && result.getContents() != null) {
-            String content = result.getContents().trim();
-            if (content.startsWith("http")) {
-                Intent i = new Intent(this, LinkCastActivity.class);
-                i.putExtra("url", content);
-                startActivity(i);
-            } else {
-                Toast.makeText(this, R.string.qr_result_invalid, Toast.LENGTH_SHORT).show();
-            }
-        }
+        startActivity(new Intent(this, QrScanActivity.class));
     }
 
     @Override

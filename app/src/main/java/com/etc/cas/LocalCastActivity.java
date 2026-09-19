@@ -34,6 +34,7 @@ public class LocalCastActivity extends BaseActivity {
     private String fileName;
     private String fileMime;
     private long fileSize = -1;
+    private CastDevice pendingDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,6 +83,11 @@ public class LocalCastActivity extends BaseActivity {
                 convertM4s(uri, panel);
             } else {
                 showPreview(uri, panel);
+                CastDevice d = pendingDevice;
+                if (d != null) {
+                    pendingDevice = null;
+                    launchSession(d);
+                }
             }
         }
     }
@@ -100,6 +106,11 @@ public class LocalCastActivity extends BaseActivity {
                 } else {
                     ((TextView) findViewById(R.id.tv_file_info)).setText(buildInfo());
                     Toast.makeText(this, R.string.local_convert_fail, Toast.LENGTH_LONG).show();
+                }
+                CastDevice d = pendingDevice;
+                if (d != null) {
+                    pendingDevice = null;
+                    launchSession(d);
                 }
             });
         }, "etcas-m4s").start();
@@ -164,18 +175,23 @@ public class LocalCastActivity extends BaseActivity {
     }
 
     private void startCastFlow() {
-        if (fileUri == null) {
-            Toast.makeText(this, R.string.local_no_file, Toast.LENGTH_SHORT).show();
+        discoverAndPick();
+    }
+
+    private void launchSession(CastDevice d) {
+        String base = LocalFileServer.start(this, fileUri, fileMime);
+        if (base == null) {
+            Toast.makeText(this, R.string.device_connect_fail, Toast.LENGTH_SHORT).show();
             return;
         }
-        ensureWifiPermission(() -> {
-            String base = LocalFileServer.start(this, fileUri, fileMime);
-            if (base == null) {
-                Toast.makeText(this, R.string.device_connect_fail, Toast.LENGTH_SHORT).show();
-                return;
-            }
-            discoverAndPick();
-        });
+        Intent i = new Intent(LocalCastActivity.this, CastSessionActivity.class);
+        i.putExtra("mode", "local");
+        i.putExtra("uri", fileUri.toString());
+        i.putExtra("mime", fileMime == null ? "" : fileMime);
+        i.putExtra("title", fileName == null ? "" : fileName);
+        i.putExtra("isDirect", true);
+        i.putExtra("device", d);
+        startActivity(i);
     }
 
     private void discoverAndPick() {
@@ -197,14 +213,12 @@ public class LocalCastActivity extends BaseActivity {
         return new DevicePickDialog.Callback() {
             @Override
             public void onPick(CastDevice d) {
-                Intent i = new Intent(LocalCastActivity.this, CastSessionActivity.class);
-                i.putExtra("mode", "local");
-                i.putExtra("uri", fileUri.toString());
-                i.putExtra("mime", fileMime == null ? "" : fileMime);
-                i.putExtra("title", fileName == null ? "" : fileName);
-                i.putExtra("isDirect", true);
-                i.putExtra("device", d);
-                startActivity(i);
+                if (fileUri == null) {
+                    pendingDevice = d;
+                    pickFile();
+                } else {
+                    launchSession(d);
+                }
             }
 
             @Override

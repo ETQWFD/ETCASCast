@@ -27,6 +27,7 @@ import java.net.URL;
 public class LinkCastActivity extends BaseActivity {
 
     private VideoInfo videoInfo;
+    private CastDevice pendingDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +82,12 @@ public class LinkCastActivity extends BaseActivity {
                 } else {
                     findViewById(R.id.img_thumb).setVisibility(View.GONE);
                 }
+
+                CastDevice d = pendingDevice;
+                if (d != null) {
+                    pendingDevice = null;
+                    launchSession(d);
+                }
             });
         }).start();
     }
@@ -116,11 +123,18 @@ public class LinkCastActivity extends BaseActivity {
     }
 
     private void startCastFlow() {
-        if (videoInfo == null) {
-            Toast.makeText(this, R.string.link_fetch_fail, Toast.LENGTH_SHORT).show();
-            return;
-        }
-        ensureWifiPermission(this::discoverAndPick);
+        discoverAndPick();
+    }
+
+    private void launchSession(CastDevice d) {
+        Intent i = new Intent(LinkCastActivity.this, CastSessionActivity.class);
+        i.putExtra("mode", "link");
+        i.putExtra("uri", videoInfo.url);
+        i.putExtra("mime", videoInfo.contentType == null ? "" : videoInfo.contentType);
+        i.putExtra("title", videoInfo.title == null ? "" : videoInfo.title);
+        i.putExtra("isDirect", videoInfo.directMedia);
+        i.putExtra("device", d);
+        startActivity(i);
     }
 
     private void discoverAndPick() {
@@ -142,14 +156,19 @@ public class LinkCastActivity extends BaseActivity {
         return new DevicePickDialog.Callback() {
             @Override
             public void onPick(CastDevice d) {
-                Intent i = new Intent(LinkCastActivity.this, CastSessionActivity.class);
-                i.putExtra("mode", "link");
-                i.putExtra("uri", videoInfo.url);
-                i.putExtra("mime", videoInfo.contentType == null ? "" : videoInfo.contentType);
-                i.putExtra("title", videoInfo.title == null ? "" : videoInfo.title);
-                i.putExtra("isDirect", videoInfo.directMedia);
-                i.putExtra("device", d);
-                startActivity(i);
+                if (videoInfo == null) {
+                    pendingDevice = d;
+                    EditText et = findViewById(R.id.et_link);
+                    String url = et.getText().toString().trim();
+                    if (!url.startsWith("http")) {
+                        Toast.makeText(LinkCastActivity.this, R.string.link_empty, Toast.LENGTH_SHORT).show();
+                        et.requestFocus();
+                        return;
+                    }
+                    fetchInfo();
+                } else {
+                    launchSession(d);
+                }
             }
 
             @Override

@@ -111,6 +111,8 @@
     <string name="qr_title">QR Cast</string>
     <string name="qr_hint">Scan a cast QR code (Bilibili / Youku / Mango TV etc.)</string>
     <string name="qr_result_invalid">No valid cast link found</string>
+    <string name="qr_camera_denied">Camera permission is required to scan. Please enable it in system settings.</string>
+    <string name="qr_camera_error">Cannot open the camera. Please make sure it is not in use.</string>
 
     <string name="permission_wifi_title">Nearby devices permission needed</string>
     <string name="permission_wifi_msg">Used to find cast devices on the same Wi-Fi</string>

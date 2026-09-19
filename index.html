@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ETCAS投屏 - 轻松投屏 · 极速流畅</title>
+<link rel="icon" type="image/png" href="assets/icon.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 108 108'%3E%3Crect width='108' height='108' rx='24' fill='%232E86DE'/%3E%3Crect y='54' width='108' height='54' rx='0' fill='%231B5FA8'/%3E%3Cpath d='M0 0h108l-54 36z' fill='%2333FFFFFF'/%3E%3Cg transform='translate(27.6 27.6) scale(2.2)'%3E%3Cpath fill='%23FFFFFF' d='M1 18v3h3c0-1.66-1.34-3-3-3zM1 14v2c2.76 0 5 2.24 5 5h2c0-3.87-3.13-7-7-7zM1 10v2c4.97 0 9 4.03 9 9h2c0-6.08-4.92-11-11-11zM21 3H3c-1.1 0-2 .9-2 2v3h2V5h18v14h-7v2h7c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap">
+<style>
+:root{
+  --sea:#2E86DE; --sea-deep:#1B5FA8; --ink:#1A1A2E; --sub:#6E6E85;
+  --bg:#F6F7FB; --card:#FFFFFF; --line:#E6E6F0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); line-height:1.6;
+}
+a{color:var(--sea);text-decoration:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--sea);color:#fff;font-weight:700;
+  padding:14px 28px;border-radius:12px;font-size:16px;
+  box-shadow:0 8px 20px rgba(46,134,222,.28);transition:transform .15s,box-shadow .15s;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(46,134,222,.36)}
+.btn.ghost{background:var(--card);color:var(--sea);box-shadow:none;border:1.5px solid var(--sea)}
+/* nav */
+nav{position:sticky;top:0;z-index:50;background:rgba(246,247,251,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;align-items:center;height:64px;gap:12px}
+nav .logo{width:36px;height:36px;border-radius:9px}
+nav .name{font-weight:900;font-size:18px}
+nav .spacer{flex:1}
+nav .btn{padding:12px 20px;font-size:14px;min-height:44px}
+/* hero */
+.hero{padding:72px 0 56px}
+.hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+.hero h1{font-size:44px;font-weight:900;line-height:1.2;letter-spacing:-.5px}
+.hero h1 span{color:var(--sea)}
+.hero .tag{color:var(--sub);font-size:18px;margin-top:14px}
+.hero .points{margin:26px 0 32px;display:flex;flex-wrap:wrap;gap:10px}
+.hero .points span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;font-size:14px;color:var(--ink)}
+.hero .cta{display:flex;gap:14px;flex-wrap:wrap}
+.hero .small{margin-top:16px;color:var(--sub);font-size:13px}
+.phone{width:100%;max-width:330px;margin:0 auto;position:relative}
+.phone .frame{border-radius:36px;border:10px solid #11131A;background:#11131A;box-shadow:0 30px 60px rgba(17,19,26,.35);overflow:hidden}
+.phone img{display:block;width:100%;height:auto}
+.phone .cap{text-align:center;color:var(--sub);font-size:13px;margin-top:10px}
+/* section */
+section{padding:64px 0}
+section:nth-of-type(even){background:var(--card);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sec-head{text-align:center;max-width:640px;margin:0 auto 44px}
+.sec-head h2{font-size:30px;font-weight:900}
+.sec-head p{color:var(--sub);margin-top:10px}
+/* video */
+.vid-wrap{max-width:880px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.vid-wrap video{display:block;width:100%;aspect-ratio:16/9;background:#000;border:none}
+/* features */
+.fgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.fcard{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:24px 20px;transition:transform .15s}
+.fcard:hover{transform:translateY(-4px)}
+.fcard .ic{width:46px;height:46px;border-radius:12px;background:#E3F2FD;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.fcard h3{font-size:17px;font-weight:700}
+.fcard p{color:var(--sub);font-size:14px;margin-top:8px}
+/* gallery */
+.gal{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.gal .shot{text-align:center}
+.gal .ph{width:100%;max-width:210px;margin:0 auto;border-radius:26px;border:8px solid #11131A;overflow:hidden;background:#11131A;box-shadow:0 16px 36px rgba(17,19,26,.22)}
+.gal .ph img{display:block;width:100%}
+.gal .cap{margin-top:12px;font-size:14px;color:var(--ink);font-weight:500}
+.gal .sub{font-size:13px;color:var(--sub)}
+/* settings strip */
+.strip{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.strip .cell{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:22px}
+.strip h4{font-size:15px;font-weight:700;margin-bottom:14px}
+.swatches{display:flex;gap:12px}
+.sw{width:34px;height:34px;border-radius:50%;box-shadow:inset 0 0 0 3px #fff,0 2px 6px rgba(0,0,0,.15)}
+.sw.sakura{background:#EC5C8B}.sw.sea{background:#2E86DE}.sw.orange{background:#F5A623}.sw.emerald{background:#21A366}
+.langs{display:flex;flex-wrap:wrap;gap:8px}
+.lang{font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+/* license */
+.lic{background:#F0F6FF;border:1px solid #D6E8FB;border-radius:18px;padding:28px;display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.lic .badge{width:56px;height:56px;border-radius:14px;background:var(--sea);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px}
+.lic h3{font-size:18px;font-weight:900}
+.lic p{color:var(--sub);font-size:14px;margin-top:6px}
+/* footer */
+footer{background:#11131A;color:#9AA0B4;padding:40px 0 32px;font-size:13px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px}
+footer b{color:#EDEFF7}
+footer a{color:#7FB5F0}
+@media (max-width:860px){
+  .hero{padding:48px 0 40px}
+  .hero .wrap{grid-template-columns:1fr;gap:36px;text-align:center}
+  .hero h1{font-size:34px}
+  .hero .cta,.hero .points{justify-content:center}
+  .fgrid{grid-template-columns:repeat(2,1fr)}
+  .gal{grid-template-columns:repeat(2,1fr)}
+  .strip{grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .fgrid{grid-template-columns:1fr 1fr}
+  .gal{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <img class="logo" src="assets/icon.png" alt="ETCAS投屏">
+    <span class="name">ETCAS投屏</span>
+    <span class="spacer"></span>
+    <a class="btn" href="https://github.com/ETQWFD/ETCASCast/releases/latest/download/ETCASCast-v1.4.3.apk" download>下载 APK</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <h1>轻松投屏<br><span>极速流畅</span></h1>
+      <p class="tag">把手机里的视频、图片、文件，一键投到电视、投影和盒子。支持屏幕镜像与链接投屏。</p>
+      <div class="points">
+        <span>本地投屏</span><span>同步模式</span><span>链接投屏</span><span>扫码投屏</span>
+      </div>
+      <div class="cta">
+        <a class="btn" href="https://github.com/ETQWFD/ETCASCast/releases/latest/download/ETCASCast-v1.4.3.apk" download>立即下载 v1.4.3</a>
+        <a class="btn ghost" href="https://github.com/ETQWFD/ETCASCast" target="_blank">查看源码</a>
+      </div>
+      <p class="small">包名 com.etc.cas · 支持 64 / 32 / x86 设备 · 开源 MIT License</p>
+    </div>
+    <div class="phone">
+      <div class="frame"><img src="assets/s4.jpg" alt="ETCAS投屏主界面"></div>
+      <div class="cap">ETCAS投屏 · 主界面</div>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>四种投屏方式</h2>
+      <p>覆盖日常投屏的所有场景，操作简单直接</p>
+    </div>
+    <div class="fgrid">
+      <div class="fcard">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E86DE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg></div>
+        <h3>本地投屏</h3>
+        <p>选择手机中的视频、图片、文件，支持所有格式，一键投屏到设备。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E86DE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c3.5 0 6.5 3 6.5 6.5M2 5.5C10.3 5.5 17 12.2 17 20.5M2 18.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3Z"/><path d="M9 5a10 10 0 0 1 10 10"/></svg></div>
+        <h3>同步模式</h3>
+        <p>实时镜像手机屏幕一个画面，手机在干什么，设备同步显示什么。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E86DE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg></div>
+        <h3>链接投屏</h3>
+        <p>输入链接，自动获取视频信息（标题、封面、类型），然后进行投屏。</p>
+      </div>
+      <div class="fcard">
+        <div class="ic"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2E86DE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+        <h3>扫码投屏</h3>
+        <p>扫描哔哩哔哩、酷喵、芒果等投屏二维码，快速开始投屏。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>使用教程</h2>
+      <p>从下载到投屏，一分钟上手</p>
+    </div>
+    <div class="vid-wrap">
+      <video src="https://raw.githubusercontent.com/ETQWFD/ETCASCast/main/demo/ETCASCast-promo.mp4" controls preload="metadata" poster="assets/promo-real.jpg"></video>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>界面实拍</h2>
+      <p>真实运行截图，所见即所得</p>
+    </div>
+    <div class="gal">
+      <div class="shot"><div class="ph"><img src="assets/s5.jpg" alt="本地投屏"></div><div class="cap">本地投屏</div><div class="sub">选择文件 · 支持所有格式</div></div>
+      <div class="shot"><div class="ph"><img src="assets/s6.jpg" alt="同步模式"></div><div class="cap">同步模式</div><div class="sub">实时镜像手机屏幕</div></div>
+      <div class="shot"><div class="ph"><img src="assets/s4.jpg" alt="链接投屏"></div><div class="cap">链接投屏</div><div class="sub">输入链接 · 自动获取信息</div></div>
+      <div class="shot"><div class="ph"><img src="assets/s1.jpg" alt="设备搜索"></div><div class="cap">设备搜索</div><div class="sub">搜索局域网投屏设备</div></div>
+      <div class="shot"><div class="ph"><img src="assets/s3.jpg" alt="屏幕捕获授权"></div><div class="cap">屏幕捕获</div><div class="sub">同步模式授权弹窗</div></div>
+      <div class="shot"><div class="ph"><img src="assets/s2.jpg" alt="镜像投屏"></div><div class="cap">镜像画面</div><div class="sub">电视 / 电脑浏览器同步查看</div></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>个性化设置</h2>
+      <p>主题、显示模式、语言随心切换</p>
+    </div>
+    <div class="strip">
+      <div class="cell">
+        <h4>四种主题色</h4>
+        <div class="swatches">
+          <span class="sw sakura" title="樱花粉"></span>
+          <span class="sw sea" title="海蓝色"></span>
+          <span class="sw orange" title="橙黄色"></span>
+          <span class="sw emerald" title="碧绿色"></span>
+        </div>
+      </div>
+      <div class="cell">
+        <h4>显示模式</h4>
+        <p style="color:var(--sub);font-size:14px">明亮模式 · 暗黑模式 · 跟随系统，一键切换。</p>
+      </div>
+      <div class="cell">
+        <h4>四种语言</h4>
+        <div class="langs">
+          <span class="lang">中文简体</span>
+          <span class="lang">English</span>
+          <span class="lang">中文繁體</span>
+          <span class="lang">日本語</span>
+        </div>
+      </div>
+      <div class="cell">
+        <h4>播放控制</h4>
+        <p style="color:var(--sub);font-size:14px">倍速 0.5x - 2.0x，清晰度自动 / 高清 / 标清 / 流畅，设备与系统音量独立调节。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="lic">
+      <div class="badge">MIT</div>
+      <div>
+        <h3>开源许可</h3>
+        <p>本软件基于 MIT License 开源，源码托管于 GitHub，可自由使用、修改与分发。开发者：ETC · 版本 1.4.2</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>
+      <b>ETCAS投屏</b> · 轻松投屏 · 极速流畅<br>
+      包名 com.etc.cas · 版本 1.4.2
+    </div>
+    <div>
+      <a href="https://github.com/ETQWFD/ETCASCast" target="_blank">GitHub 仓库</a> ·
+      <a href="https://github.com/ETQWFD/ETCASCast/releases" target="_blank">Releases</a> ·
+      开发者 ETC
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -19,6 +19,9 @@
         android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PROJECTION"
         tools:targetApi="34" />
     <uses-permission
+        android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+        tools:targetApi="34" />
+    <uses-permission
         android:name="android.permission.POST_NOTIFICATIONS"
         tools:targetApi="33" />
 
@@ -77,6 +80,12 @@
             android:name=".MirrorService"
             android:exported="false"
             android:foregroundServiceType="mediaProjection"
+            tools:targetApi="q" />
+
+        <service
+            android:name=".CastKeepAliveService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback"
             tools:targetApi="q" />
     </application>
 </manifest>

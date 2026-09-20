@@ -46,8 +46,29 @@ public class LocalCastActivity extends BaseActivity {
         findViewById(R.id.btn_cast).setOnClickListener(v -> startCastFlow());
 
         if (getIntent() != null && getIntent().getBooleanExtra("auto_search", false)) {
-            findViewById(R.id.btn_cast).postDelayed(this::discoverAndPick, 400);
+            String castUrl = getIntent().getStringExtra("cast_url");
+            if (castUrl != null && !castUrl.isEmpty()) {
+                findViewById(R.id.btn_cast).postDelayed(() -> connectByUrl(castUrl), 400);
+            } else {
+                findViewById(R.id.btn_cast).postDelayed(this::discoverAndPick, 400);
+            }
         }
+    }
+
+    private void connectByUrl(String castUrl) {
+        Toast.makeText(this, R.string.probing, Toast.LENGTH_SHORT).show();
+        new DeviceDiscoverer().probeUrl(this, castUrl, (devices, stillSearching) -> runOnUiThread(() -> {
+            if (devices == null || devices.isEmpty()) {
+                if (!stillSearching) {
+                    Toast.makeText(this, R.string.device_search_fail, Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                pendingDevice = devices.get(0);
+                Toast.makeText(this, getString(R.string.qr_etcas_connected) + " · " + pendingDevice.name,
+                        Toast.LENGTH_SHORT).show();
+                if (fileUri == null) pickFile();
+            }
+        }));
     }
 
     @Override

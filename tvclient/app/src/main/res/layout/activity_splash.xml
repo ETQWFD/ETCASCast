@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="48dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/splash_title"
+        android:textColor="@color/text_main"
+        android:textSize="40sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="@string/splash_subtitle"
+        android:textColor="@color/text_sub"
+        android:textSize="18sp" />
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="520dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:max="20"
+        android:progressTint="@color/accent_light" />
+
+    <TextView
+        android:id="@+id/tv_device"
+        android:layout_width="520dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="@string/splash_device_doing"
+        android:textColor="@color/text_sub"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/tv_net"
+        android:layout_width="520dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:text="@string/splash_net_doing"
+        android:textColor="@color/text_sub"
+        android:textSize="18sp" />
+</LinearLayout>

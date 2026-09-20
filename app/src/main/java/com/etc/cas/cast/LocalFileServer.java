@@ -16,12 +16,16 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.util.Collections;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class LocalFileServer {
 
     private static final int BASE_PORT = 8388;
     private static volatile ServerSocket server;
     private static volatile Thread acceptThread;
+    private static volatile ThreadPoolExecutor pool;
     private static volatile boolean running;
     private static volatile Uri currentUri;
     private static volatile String currentMime;
@@ -43,7 +47,15 @@ public class LocalFileServer {
             }
             if (ss == null) return null;
             server = ss;
+            pool = new ThreadPoolExecutor(2, 8, 20, TimeUnit.SECONDS,
+                    new SynchronousQueue<>(), r -> {
+                Thread t = new Thread(r, "etcas-http-conn");
+                t.setDaemon(true);
+                t.setPriority(Thread.NORM_PRIORITY - 1);
+                return t;
+            }, new ThreadPoolExecutor.DiscardPolicy());
             acceptThread = new Thread(() -> acceptLoop(), "etcas-http");
+            acceptThread.setDaemon(true);
             acceptThread.start();
         } catch (Exception e) {
             return null;
@@ -83,14 +95,21 @@ public class LocalFileServer {
         }
         server = null;
         acceptThread = null;
+        if (pool != null) {
+            pool.shutdownNow();
+            pool = null;
+        }
     }
 
     private static void acceptLoop() {
         while (running) {
             try {
                 Socket s = server.accept();
-                Thread t = new Thread(() -> handle(s), "etcas-http-conn");
-                t.start();
+                ThreadPoolExecutor p = pool;
+                if (p != null) p.execute(() -> handle(s));
+                else {
+                    try { s.close(); } catch (Exception ignored) {}
+                }
             } catch (SocketTimeoutException ignored) {
             } catch (Exception e) {
                 break;

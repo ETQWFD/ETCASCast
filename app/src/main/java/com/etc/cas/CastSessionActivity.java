@@ -110,6 +110,15 @@ public class CastSessionActivity extends BaseActivity {
         ThemeManager.apply(this);
         FontManager.apply(findViewById(android.R.id.content), this);
         refreshChips();
+        if (started && isDirect && player != null && player.getPlaybackState() != androidx.media3.common.Player.STATE_ENDED) {
+            player.play();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (player != null) player.pause();
     }
 
     private void setupPlayer() {
@@ -169,6 +178,8 @@ public class CastSessionActivity extends BaseActivity {
             }, "etcas-cast").start();
         }
 
+        CastKeepAliveService.start(this, title == null || title.isEmpty() ? device == null ? "" : device.name : title);
+
         if (isImage) {
             imgImage.setVisibility(View.VISIBLE);
         } else if (isDirect && player != null) {
@@ -187,6 +198,7 @@ public class CastSessionActivity extends BaseActivity {
             final CastDevice dev = device;
             new Thread(() -> CastManager.stop(dev), "etcas-cast-stop").start();
         }
+        CastKeepAliveService.stop(this);
         if (player != null) {
             player.stop();
             player.release();
@@ -336,7 +348,7 @@ public class CastSessionActivity extends BaseActivity {
             webView.destroy();
             webView = null;
         }
-        if ("local".equals(mode)) {
+        if (!started && "local".equals(mode)) {
             LocalFileServer.stop();
         }
         super.onDestroy();

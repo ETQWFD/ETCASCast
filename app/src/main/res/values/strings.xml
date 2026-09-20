@@ -141,4 +141,8 @@
     <string name="version_fmt">版本 %1$s</string>
     <string name="qr_code_hint">这是电视端配对码。请确认手机与电视连接同一 Wi-Fi，再通过「投屏」搜索并选择电视设备。</string>
     <string name="qr_search_device">搜索设备</string>
+    <string name="qr_etcas_found">识别到 ETCAS 电视客户端，正在连接…</string>
+    <string name="qr_etcas_connected">已连接 ETCAS 电视客户端</string>
+    <string name="cast_notif_title">ETCAS 投屏中</string>
+    <string name="cast_notif_text">正在向电视投屏，熄屏或切换应用不会中断</string>
 </resources>

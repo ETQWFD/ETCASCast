@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ETCAS投屏客户端</string>
+    <string name="notif_channel">ETCAS 接收服务</string>
+    <string name="notif_title">ETCAS投屏客户端运行中</string>
+    <string name="notif_text">电视端已就绪，可被手机搜索并投屏</string>
+
+    <string name="splash_title">ETCAS投屏客户端</string>
+    <string name="splash_subtitle">正在初始化电视接收服务</string>
+    <string name="splash_device_doing">正在获取电视设备名称与版本…</string>
+    <string name="splash_device_done">已获取设备信息</string>
+    <string name="splash_net_doing">正在检测网络连接…</string>
+    <string name="splash_net_done">网络已连接</string>
+    <string name="splash_enter">即将进入主界面</string>
+
+    <string name="main_brand">ETCAS投屏客户端</string>
+    <string name="main_waiting">等待手机连接 · 使用手机 ETCAS投屏 扫码或搜索本设备</string>
+    <string name="main_loading">正在加载投屏内容…</string>
+    <string name="main_casting">正在投屏播放</string>
+    <string name="main_ip">连接 IP</string>
+    <string name="main_key">配对密钥</string>
+    <string name="main_qr_caption">手机扫码投屏</string>
+    <string name="main_hint">也可在手机投屏端选择「手动添加设备」输入上方 IP</string>
+</resources>

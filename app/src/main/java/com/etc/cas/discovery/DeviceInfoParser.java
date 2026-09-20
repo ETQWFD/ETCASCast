@@ -103,6 +103,7 @@ public class DeviceInfoParser {
 
     private static String classify(String model, String name) {
         String t = (model + " " + name).toLowerCase();
+        if (t.contains("etcas")) return "ETCAS投屏客户端";
         if (t.contains("bilibili") || t.contains("哔哩") || t.contains("小电视") || t.contains("云视听")) return "哔哩哔哩 · 云视听小电视";
         if (t.contains("youku") || t.contains("酷喵") || t.contains("cibn") || t.contains("优酷")) return "酷喵 · 优酷 TV";
         if (t.contains("mango") || t.contains("芒果") || t.contains("mgtv")) return "芒果 TV 设备";

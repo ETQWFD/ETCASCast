@@ -141,4 +141,8 @@
     <string name="version_fmt">Version %1$s</string>
     <string name="qr_code_hint">This is a TV pairing code. Make sure your phone and TV are on the same Wi‑Fi, then tap Cast and choose your TV.</string>
     <string name="qr_search_device">Search devices</string>
+    <string name="qr_etcas_found">ETCAS TV client found, connecting…</string>
+    <string name="qr_etcas_connected">Connected to ETCAS TV client</string>
+    <string name="cast_notif_title">ETCAS Casting</string>
+    <string name="cast_notif_text">Casting to your TV. Turning the screen off or switching apps will not stop it.</string>
 </resources>

@@ -3,6 +3,7 @@ package com.etc.cas;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -102,8 +103,39 @@ public class QrScanActivity extends BaseActivity {
         return null;
     }
 
+    private String detectEtcas(String raw) {
+        if (raw == null) return null;
+        String value = raw.trim();
+        if (!value.toLowerCase().startsWith("etcas://")) return null;
+        try {
+            Uri u = Uri.parse(value);
+            String ip = u.getQueryParameter("ip");
+            if (ip == null || ip.isEmpty()) return null;
+            String port = u.getQueryParameter("port");
+            int p = 9170;
+            if (port != null && !port.isEmpty()) {
+                try { p = Integer.parseInt(port.trim()); } catch (Exception ignored) {}
+            }
+            return "http://" + ip.trim() + ":" + p + "/rootDesc.xml";
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private void handleResult(String text) {
         if (launched) return;
+        String etcas = detectEtcas(text);
+        if (etcas != null) {
+            launched = true;
+            stopCamera();
+            Toast.makeText(this, R.string.qr_etcas_found, Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(this, LocalCastActivity.class);
+            i.putExtra("auto_search", true);
+            i.putExtra("cast_url", etcas);
+            startActivity(i);
+            finish();
+            return;
+        }
         String url = extractUrl(text);
         if (url != null) {
             launched = true;

@@ -16,6 +16,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class DeviceDiscoverer {
 
@@ -39,18 +44,44 @@ public class DeviceDiscoverer {
             "/DeviceDescription.xml", "/device/description.xml", "/rootDesc/description.xml",
             "/xml/device_description.xml", "/dmr.xml", "/devicedesc.xml"
     };
-    private static final int[] PROBE_PORTS = {80, 8080, 8060, 9000, 49152, 49153, 49154, 49155, 36666, 5000, 1900, 52235};
+    private static final int[] PROBE_PORTS = {9170, 80, 8080, 8060, 9000, 49152, 49153, 49154, 49155, 36666, 5000, 1900, 52235};
+
+    private static final ThreadFactory DAEMON_FACTORY = r -> {
+        Thread t = new Thread(r);
+        t.setDaemon(true);
+        t.setPriority(Thread.NORM_PRIORITY - 1);
+        return t;
+    };
 
     private final Handler main = new Handler(Looper.getMainLooper());
+    private ExecutorService parsePool;
 
     public void start(Context ctx, Listener listener) {
         final Context app = ctx.getApplicationContext();
-        new Thread(() -> discover(app, listener), "etcas-discover").start();
+        Thread t = new Thread(() -> discover(app, listener), "etcas-discover");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    public void probeUrl(Context ctx, final String url, Listener listener) {
+        final Context app = ctx.getApplicationContext();
+        Thread t = new Thread(() -> {
+            List<CastDevice> all = new ArrayList<>();
+            post(listener, all, true);
+            CastDevice d = DeviceInfoParser.parse(url);
+            if (d != null) {
+                all.add(d);
+                post(listener, all, true);
+            }
+            post(listener, all, false);
+        }, "etcas-probe-url");
+        t.setDaemon(true);
+        t.start();
     }
 
     public void probeIp(Context ctx, final String ip, Listener listener) {
         final Context app = ctx.getApplicationContext();
-        new Thread(() -> {
+        Thread t = new Thread(() -> {
             List<CastDevice> all = new ArrayList<>();
             post(listener, all, true);
             CastDevice d = probeOne(ip);
@@ -59,7 +90,9 @@ public class DeviceDiscoverer {
                 post(listener, all, true);
             }
             post(listener, all, false);
-        }, "etcas-probe").start();
+        }, "etcas-probe");
+        t.setDaemon(true);
+        t.start();
     }
 
     private void discover(Context ctx, Listener listener) {
@@ -68,6 +101,7 @@ public class DeviceDiscoverer {
         MulticastSocket socket = null;
         final List<CastDevice> result = new ArrayList<>();
         final Set<String> seenUrls = new LinkedHashSet<>();
+        parsePool = Executors.newFixedThreadPool(10, DAEMON_FACTORY);
         try {
             if (wm != null) {
                 lock = wm.createMulticastLock("etcas-ssdp");
@@ -148,6 +182,14 @@ public class DeviceDiscoverer {
                 if (lock != null) lock.release();
             } catch (Exception ignored) {
             }
+            try {
+                if (parsePool != null) {
+                    parsePool.shutdown();
+                    parsePool.awaitTermination(3, java.util.concurrent.TimeUnit.SECONDS);
+                    parsePool = null;
+                }
+            } catch (Exception ignored) {
+            }
         }
         try {
             Thread.sleep(1500);
@@ -161,13 +203,20 @@ public class DeviceDiscoverer {
     }
 
     private void parseAsync(final String location, final ParseCallback cb) {
-        new Thread(() -> {
+        Runnable job = () -> {
             try {
                 cb.onParsed(DeviceInfoParser.parse(location));
             } catch (Exception e) {
                 cb.onParsed(null);
             }
-        }, "etcas-desc").start();
+        };
+        ExecutorService p = parsePool;
+        if (p != null) p.execute(job);
+        else {
+            Thread t = new Thread(job, "etcas-desc");
+            t.setDaemon(true);
+            t.start();
+        }
     }
 
     private static String deviceKey(CastDevice d) {
@@ -195,14 +244,27 @@ public class DeviceDiscoverer {
             return DeviceInfoParser.parse(clean);
         }
         int colon = clean.indexOf(':');
-        String host = colon > 0 ? clean.substring(0, colon) : clean;
-        for (int port : PROBE_PORTS) {
-            for (String path : PROBE_PATHS) {
-                CastDevice d = DeviceInfoParser.parse("http://" + host + ":" + port + path);
-                if (d != null) return d;
+        final String host = colon > 0 ? clean.substring(0, colon) : clean;
+
+        final AtomicReference<CastDevice> found = new AtomicReference<>();
+        ExecutorService pool = Executors.newFixedThreadPool(16, DAEMON_FACTORY);
+        List<Future<?>> futures = new ArrayList<>();
+        for (final int port : PROBE_PORTS) {
+            for (final String path : PROBE_PATHS) {
+                futures.add(pool.submit(() -> {
+                    if (found.get() != null) return;
+                    CastDevice d = DeviceInfoParser.parse("http://" + host + ":" + port + path);
+                    if (d != null) found.compareAndSet(null, d);
+                }));
             }
         }
-        return null;
+        pool.shutdown();
+        try {
+            pool.awaitTermination(8, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+        }
+        for (Future<?> f : futures) f.cancel(true);
+        return found.get();
     }
 
     private static List<CastDevice> snapshot(List<CastDevice> src) {

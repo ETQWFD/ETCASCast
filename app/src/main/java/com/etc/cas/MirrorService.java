@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ServiceInfo;
 import android.graphics.Bitmap;
@@ -14,10 +15,12 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
 
 import com.etc.cas.cast.LocalFileServer;
 
@@ -27,12 +30,16 @@ import java.nio.ByteBuffer;
 public class MirrorService extends Service {
 
     public static final String ACTION_START = "com.etc.cas.START_MIRROR";
+    private static final long FRAME_INTERVAL_MS = 66L;
 
     private MediaProjection projection;
     private VirtualDisplay vd;
     private ImageReader imageReader;
     private HandlerThread encodeThread;
     private Handler encodeHandler;
+    private WifiManager.WifiLock wifiLock;
+    private PowerManager.WakeLock wakeLock;
+    private long lastFrameTs;
 
     @Override
     public void onCreate() {
@@ -66,6 +73,7 @@ public class MirrorService extends Service {
         } else {
             startForeground(1, notification);
         }
+        acquireLocks();
         int code = intent.getIntExtra("code", 0);
         Intent data = intent.getParcelableExtra("data");
         startCapture(code, data);
@@ -103,12 +111,16 @@ public class MirrorService extends Service {
                 try {
                     image = reader.acquireLatestImage();
                     if (image == null) return;
+                    long now = System.currentTimeMillis();
+                    if (now - lastFrameTs < FRAME_INTERVAL_MS) return;
+                    lastFrameTs = now;
                     Bitmap frame = toBitmap(image, capW, capH);
                     if (frame == null) return;
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    frame.compress(Bitmap.CompressFormat.JPEG, 60, bos);
+                    frame.compress(Bitmap.CompressFormat.JPEG, 55, bos);
                     frame.recycle();
-                    LocalFileServer.setFrame(bos.toByteArray());
+                    byte[] jpeg = bos.toByteArray();
+                    if (jpeg.length > 0) LocalFileServer.setFrame(jpeg);
                 } catch (Exception ignored) {
                 } finally {
                     if (image != null) image.close();
@@ -117,6 +129,36 @@ public class MirrorService extends Service {
         } catch (Exception e) {
             stopSelf();
         }
+    }
+
+    private void acquireLocks() {
+        if (wifiLock == null) {
+            WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            if (wm != null) {
+                wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "etcas:mirror-wifi");
+                wifiLock.setReferenceCounted(false);
+                wifiLock.acquire();
+            }
+        }
+        if (wakeLock == null) {
+            PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "etcas:mirror-wake");
+            wakeLock.setReferenceCounted(false);
+            wakeLock.acquire(60 * 60 * 1000L);
+        }
+    }
+
+    private void releaseLocks() {
+        try {
+            if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
+        } catch (Exception ignored) {
+        }
+        try {
+            if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
+        } catch (Exception ignored) {
+        }
+        wifiLock = null;
+        wakeLock = null;
     }
 
     private Bitmap toBitmap(Image image, int w, int h) {
@@ -141,6 +183,7 @@ public class MirrorService extends Service {
     @Override
     public void onDestroy() {
         LocalFileServer.setFrame(null);
+        releaseLocks();
         try {
             if (vd != null) vd.release();
         } catch (Exception ignored) {

@@ -145,4 +145,19 @@
     <string name="qr_etcas_connected">已連線 ETCAS 電視客戶端</string>
     <string name="cast_notif_title">ETCAS 投屏中</string>
     <string name="cast_notif_text">正在向電視投屏，熄屏或切換應用不會中斷</string>
+
+    <string name="update_no_pkg">暫未找到可用的安裝包</string>
+    <string name="update_downloading">正在下載更新…</string>
+    <string name="update_download_fail">下載失敗，請重試</string>
+    <string name="update_install_fail">調起安裝失敗</string>
+    <string name="pair_title">輸入配對碼</string>
+    <string name="pair_code_hint">請輸入電視上顯示的配對碼</string>
+    <string name="pairing">正在配對…</string>
+    <string name="pair_ok">配對成功</string>
+    <string name="pair_fail">配對失敗，請確認配對碼</string>
+    <string name="dev_website">官方網站（etc.os.kg）</string>
+    <string name="eula_title">ETCAS投屏 許可協議</string>
+    <string name="eula_agree">同意並繼續</string>
+    <string name="eula_exit">不同意，退出</string>
+    <string name="eula_extra">致敬開發者：ETC協會\n翻譯者：POAI\n\n本軟體依據 MIT 授權條款開源提供，僅供個人合法投屏使用。\n1. 投屏、螢幕鏡像所涉及的內容版權歸原權利人所有，請僅投屏您有權播放的內容，勿用於侵權用途。\n2. 軟體在同一區域網路內透過 DLNA/UPnP 傳輸媒體，不會上傳您的檔案；螢幕鏡像僅在您主動開啟並授權後執行，可隨時停止。\n3. 本軟體按「現狀」提供，不對投屏相容性、畫質、延遲作任何明示或默示擔保，因使用產生的風險由您自行承擔。\n4. 請勿用於危害國家安全、傳播違法資訊或干擾他人裝置等任何違法用途。\n點擊「同意並繼續」即表示您已閱讀並同意以上條款及 MIT 授權條款。</string>
 </resources>

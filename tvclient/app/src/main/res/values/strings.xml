@@ -21,4 +21,22 @@
     <string name="main_key">配对密钥</string>
     <string name="main_qr_caption">手机扫码投屏</string>
     <string name="main_hint">也可在手机投屏端选择「手动添加设备」输入上方 IP</string>
+
+    <string name="load_line_1">投屏加载中…</string>
+    <string name="load_line_2">ETC协会制作</string>
+    <string name="load_line_3">让我们致敬开发者!</string>
+    <string name="load_line_4">官网 etc.os.kg</string>
+
+    <string name="eula_title">ETCAS投屏客户端 许可协议</string>
+    <string name="eula_agree">同意并继续</string>
+    <string name="eula_exit">不同意，退出</string>
+    <string name="eula_text">致敬开发者：ETC协会\n翻译者：POAI\n\n本软件依据 MIT 许可证开源提供，作为 ETCAS投屏 的电视接收端，仅供个人合法投屏使用。\n1. 投屏、屏幕镜像所涉及的内容版权归原权利人所有，请仅接收您有权播放的内容，勿用于侵权用途。\n2. 本软件在同一局域网内通过 DLNA/UPnP 接收媒体，不向外部上传任何数据。\n3. 本软件按“现状”提供，不对投屏兼容性、画质、延迟作任何明示或默示担保，因使用产生的风险由您自行承担。\n4. 请勿用于传播违法信息或干扰他人设备等任何违法用途。\n点击“同意并继续”即表示您已阅读并同意以上条款及 MIT 许可证。</string>
+
+    <string name="update_title">发现新版本</string>
+    <string name="update_found">发现新版本</string>
+    <string name="update_yes">立即更新</string>
+    <string name="update_no">暂不更新</string>
+    <string name="update_downloading">正在下载更新…</string>
+    <string name="update_download_fail">下载失败，请重试</string>
+    <string name="update_install_fail">调起安装失败</string>
 </resources>

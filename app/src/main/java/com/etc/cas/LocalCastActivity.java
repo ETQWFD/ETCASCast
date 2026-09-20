@@ -16,6 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.etc.cas.cast.LocalFileServer;
+import com.etc.cas.cast.PairGate;
 import com.etc.cas.discovery.CastDevice;
 import com.etc.cas.discovery.DeviceDiscoverer;
 import com.etc.cas.util.DevicePickDialog;
@@ -66,7 +67,9 @@ public class LocalCastActivity extends BaseActivity {
                 pendingDevice = devices.get(0);
                 Toast.makeText(this, getString(R.string.qr_etcas_connected) + " · " + pendingDevice.name,
                         Toast.LENGTH_SHORT).show();
-                if (fileUri == null) pickFile();
+                PairGate.request(this, pendingDevice, d -> {
+                    if (fileUri == null) pickFile();
+                });
             }
         }));
     }
@@ -238,12 +241,14 @@ public class LocalCastActivity extends BaseActivity {
         return new DevicePickDialog.Callback() {
             @Override
             public void onPick(CastDevice d) {
-                if (fileUri == null) {
-                    pendingDevice = d;
-                    pickFile();
-                } else {
-                    launchSession(d);
-                }
+                PairGate.request(LocalCastActivity.this, d, dev -> {
+                    if (fileUri == null) {
+                        pendingDevice = dev;
+                        pickFile();
+                    } else {
+                        launchSession(dev);
+                    }
+                });
             }
 
             @Override

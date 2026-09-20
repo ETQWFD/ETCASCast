@@ -145,4 +145,19 @@
     <string name="qr_etcas_connected">Connected to ETCAS TV client</string>
     <string name="cast_notif_title">ETCAS Casting</string>
     <string name="cast_notif_text">Casting to your TV. Turning the screen off or switching apps will not stop it.</string>
+
+    <string name="update_no_pkg">No install package found</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_download_fail">Download failed, please try again</string>
+    <string name="update_install_fail">Unable to start the installer</string>
+    <string name="pair_title">Enter pairing code</string>
+    <string name="pair_code_hint">Enter the pairing code shown on your TV</string>
+    <string name="pairing">Pairing…</string>
+    <string name="pair_ok">Paired successfully</string>
+    <string name="pair_fail">Pairing failed, please check the code</string>
+    <string name="dev_website">Official Website (etc.os.kg)</string>
+    <string name="eula_title">ETCAS Cast License Agreement</string>
+    <string name="eula_agree">Agree and Continue</string>
+    <string name="eula_exit">Decline and Exit</string>
+    <string name="eula_extra">Developer: ETC Association\nTranslator: POAI\n\nThis software is open-sourced under the MIT License and is provided for lawful personal screen casting only.\n1. All content you cast or mirror remains the property of its rightful owners. Please cast only content you are authorized to play, and do not use it for infringement.\n2. Media is delivered over your local network via DLNA/UPnP and your files are never uploaded. Screen mirroring runs only after you explicitly start and authorize it, and can be stopped at any time.\n3. The software is provided &quot;as is&quot; without any warranty regarding compatibility, quality or latency. You bear all risks of using it.\n4. Do not use it for any unlawful purpose, including interfering with other devices or transmitting illegal content.\nTapping &quot;Agree and Continue&quot; means you accept these terms and the MIT License.</string>
 </resources>

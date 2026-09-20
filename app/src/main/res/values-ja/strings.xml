@@ -145,4 +145,19 @@
     <string name="qr_etcas_connected">ETCASテレビクライアントに接続しました</string>
     <string name="cast_notif_title">ETCAS 投写中</string>
     <string name="cast_notif_text">テレビに投写中です。画面オフやアプリ切替では中断されません。</string>
+
+    <string name="update_no_pkg">インストールパッケージが見つかりません</string>
+    <string name="update_downloading">更新をダウンロード中…</string>
+    <string name="update_download_fail">ダウンロードに失敗しました。もう一度お試しください</string>
+    <string name="update_install_fail">インストーラーを起動できません</string>
+    <string name="pair_title">ペアリングコードを入力</string>
+    <string name="pair_code_hint">テレビに表示されたペアリングコードを入力してください</string>
+    <string name="pairing">ペアリング中…</string>
+    <string name="pair_ok">ペアリング成功</string>
+    <string name="pair_fail">ペアリングに失敗しました。コードを確認してください</string>
+    <string name="dev_website">公式サイト（etc.os.kg）</string>
+    <string name="eula_title">ETCAS投屏 利用許諾契約</string>
+    <string name="eula_agree">同意して続行</string>
+    <string name="eula_exit">同意しない（終了）</string>
+    <string name="eula_extra">開発者への敬意：ETC協会\n翻訳者：POAI\n\n本ソフトウェアは MIT ライセンスに基づきオープンソースで提供され、個人による合法的な投写のみを目的とします。\n1. 投写・ミラーリングするコンテンツの著作権は正当な権利者に帰属します。再生権限のあるコンテンツのみを投写し、侵害目的で使用しないでください。\n2. メディアは DLNA/UPnP により同一ローカルネットワーク内で伝送され、ファイルが外部へアップロードされることはありません。画面ミラーリングはお客様が明示的に開始・許可した場合のみ動作し、いつでも停止できます。\n3. 本ソフトウェアは「現状有姿」で提供され、互換性・画質・遅延について一切保証しません。利用に伴うリスクはお客様が負います。\n4. 他者の機器への妨害や違法なコンテンツの伝送など、違法な目的に使用しないでください。\n「同意して続行」をタップすると、本条件と MIT ライセンスに同意したものとみなされます。</string>
 </resources>

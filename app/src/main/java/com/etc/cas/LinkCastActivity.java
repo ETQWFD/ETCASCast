@@ -156,19 +156,21 @@ public class LinkCastActivity extends BaseActivity {
         return new DevicePickDialog.Callback() {
             @Override
             public void onPick(CastDevice d) {
-                if (videoInfo == null) {
-                    pendingDevice = d;
-                    EditText et = findViewById(R.id.et_link);
-                    String url = et.getText().toString().trim();
-                    if (!url.startsWith("http")) {
-                        Toast.makeText(LinkCastActivity.this, R.string.link_empty, Toast.LENGTH_SHORT).show();
-                        et.requestFocus();
-                        return;
+                com.etc.cas.cast.PairGate.request(LinkCastActivity.this, d, dev -> {
+                    if (videoInfo == null) {
+                        pendingDevice = dev;
+                        EditText et = findViewById(R.id.et_link);
+                        String url = et.getText().toString().trim();
+                        if (!url.startsWith("http")) {
+                            Toast.makeText(LinkCastActivity.this, R.string.link_empty, Toast.LENGTH_SHORT).show();
+                            et.requestFocus();
+                            return;
+                        }
+                        fetchInfo();
+                    } else {
+                        launchSession(dev);
                     }
-                    fetchInfo();
-                } else {
-                    launchSession(d);
-                }
+                });
             }
 
             @Override

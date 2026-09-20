@@ -2,6 +2,7 @@ package com.etc.cas;
 
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -56,6 +57,7 @@ public class SettingsActivity extends BaseActivity {
                 UpdateChecker.check(this));
 
         findViewById(R.id.row_license).setOnClickListener(v -> showLicense());
+        findViewById(R.id.row_website).setOnClickListener(v -> openWebsite());
         findViewById(R.id.row_tribute).setOnClickListener(v -> showTribute());
 
         ((TextView) findViewById(R.id.tv_dev_version))
@@ -119,6 +121,15 @@ public class SettingsActivity extends BaseActivity {
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
         finish();
+    }
+
+    private void openWebsite() {
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://etc.os.kg"))
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        } catch (Exception e) {
+            Toast.makeText(this, "https://etc.os.kg", Toast.LENGTH_LONG).show();
+        }
     }
 
     private void showTribute() {

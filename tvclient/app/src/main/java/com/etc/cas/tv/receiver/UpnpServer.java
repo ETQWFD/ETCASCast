@@ -122,6 +122,8 @@ public class UpnpServer {
             } else if ("GET".equalsIgnoreCase(method) && path.startsWith("/etcas/info")) {
                 writeJson(out, "{\"name\":\"" + esc(friendlyName) + "\",\"model\":\"" + esc(model)
                         + "\",\"android\":\"" + esc(androidVersion) + "\",\"key\":\"" + esc(key) + "\"}");
+            } else if ("POST".equalsIgnoreCase(method) && path.startsWith("/etcas/pair")) {
+                handlePair(out, body);
             } else if ("POST".equalsIgnoreCase(method) && path.contains("AVTransport")) {
                 writeXml(out, handleAvt(soapAction, body));
             } else if ("POST".equalsIgnoreCase(method) && path.contains("RenderingControl")) {
@@ -162,7 +164,7 @@ public class UpnpServer {
                 CastState.get().setPlaying(false);
                 return soapResponse(AVT, "Pause");
             case "Stop":
-                CastState.get().setPlaying(false);
+                CastState.get().clear();
                 return soapResponse(AVT, "Stop");
             case "GetPositionInfo":
                 return positionInfoResponse();
@@ -171,6 +173,27 @@ public class UpnpServer {
             default:
                 return soapResponse(AVT, action.isEmpty() ? "Response" : action);
         }
+    }
+
+    private void handlePair(OutputStream out, String body) throws Exception {
+        String submitted = "";
+        if (body != null) {
+            for (String pair : body.split("&")) {
+                int eq = pair.indexOf('=');
+                if (eq > 0 && "key".equals(pair.substring(0, eq))) {
+                    submitted = java.net.URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+                }
+            }
+        }
+        submitted = submitted.trim().toUpperCase();
+        boolean ok = key != null && key.equalsIgnoreCase(submitted);
+        if (ok) CastState.get().notifyPaired();
+        byte[] data = ("{\"ok\":" + ok + "}").getBytes(StandardCharsets.UTF_8);
+        String status = ok ? "200 OK" : "403 Forbidden";
+        out.write(("HTTP/1.1 " + status + "\r\nContent-Type: application/json; charset=utf-8\r\n"
+                + "Content-Length: " + data.length + "\r\nConnection: close\r\n\r\n")
+                .getBytes(StandardCharsets.UTF_8));
+        out.write(data);
     }
 
     private String handleRend(String soapAction, String body) {

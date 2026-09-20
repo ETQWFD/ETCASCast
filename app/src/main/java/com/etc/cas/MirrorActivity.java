@@ -11,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 
 import com.etc.cas.cast.LocalFileServer;
+import com.etc.cas.cast.PairGate;
 import com.etc.cas.discovery.CastDevice;
 import com.etc.cas.discovery.DeviceDiscoverer;
 import com.etc.cas.util.DevicePickDialog;
@@ -21,6 +22,7 @@ public class MirrorActivity extends BaseActivity {
 
     private boolean mirroring;
     private CastDevice pendingDevice;
+    private CastDevice mirrorDevice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,19 +84,23 @@ public class MirrorActivity extends BaseActivity {
         ((TextView) findViewById(R.id.tv_mirror_status)).setText(R.string.mirror_running);
         findViewById(R.id.tv_mirror_live).setVisibility(View.VISIBLE);
         ((TextView) findViewById(R.id.btn_mirror)).setText(R.string.mirror_stop);
-        TextView url = findViewById(R.id.tv_mirror_url);
-        url.setVisibility(View.VISIBLE);
-        url.setText(getString(R.string.mirror_browser_hint) + "\n" + LocalFileServer.mirrorPageUrl(this));
+        findViewById(R.id.tv_mirror_url).setVisibility(View.GONE);
 
         if (pendingDevice != null) {
             CastDevice d = pendingDevice;
             pendingDevice = null;
-            showConnected(d);
+            startMirrorTo(d);
         }
     }
 
     private void stopMirror() {
         stopService(new Intent(this, MirrorService.class));
+        CastKeepAliveService.stop(this);
+        final CastDevice d = mirrorDevice;
+        if (d != null) {
+            new Thread(() -> com.etc.cas.cast.CastManager.stop(d), "etcas-mirror-stop").start();
+        }
+        mirrorDevice = null;
         mirroring = false;
         ((TextView) findViewById(R.id.tv_mirror_status)).setText(R.string.mirror_start);
         findViewById(R.id.tv_mirror_live).setVisibility(View.GONE);
@@ -117,8 +123,38 @@ public class MirrorActivity extends BaseActivity {
         }
     }
 
+    private void startMirrorTo(final CastDevice d) {
+        mirrorDevice = d;
+        if (d.etcas) {
+            final String frameUrl;
+            try {
+                frameUrl = "etcas://mirror?u="
+                        + java.net.URLEncoder.encode(LocalFileServer.frameUrl(MirrorActivity.this), "UTF-8");
+            } catch (Exception e) {
+                return;
+            }
+            CastKeepAliveService.start(this, d.name);
+            new Thread(() -> {
+                boolean ok = com.etc.cas.cast.CastManager.cast(d, frameUrl, "");
+                runOnUiThread(() -> {
+                    ((TextView) findViewById(R.id.tv_mirror_status))
+                            .setText(getString(R.string.session_casting_to) + " " + d.name
+                                    + (ok ? "" : "（" + getString(R.string.device_not_response) + "）"));
+                    Toast.makeText(MirrorActivity.this,
+                            getString(R.string.session_casting_to) + " " + d.name,
+                            Toast.LENGTH_SHORT).show();
+                });
+            }, "etcas-mirror-cast").start();
+        } else {
+            showConnected(d);
+        }
+    }
+
     private void showConnected(CastDevice d) {
         String url = LocalFileServer.mirrorPageUrl(MirrorActivity.this);
+        TextView tv = findViewById(R.id.tv_mirror_url);
+        tv.setVisibility(View.VISIBLE);
+        tv.setText(getString(R.string.mirror_browser_hint) + "\n" + url);
         new AlertDialog.Builder(MirrorActivity.this)
                 .setTitle(R.string.device_connected)
                 .setMessage(getString(R.string.session_casting_to) + " " + d.name + "\n\n"
@@ -131,12 +167,14 @@ public class MirrorActivity extends BaseActivity {
         return new DevicePickDialog.Callback() {
             @Override
             public void onPick(CastDevice d) {
-                if (!mirroring) {
-                    pendingDevice = d;
-                    requestProjection();
-                } else {
-                    showConnected(d);
-                }
+                PairGate.request(MirrorActivity.this, d, dev -> {
+                    if (!mirroring) {
+                        pendingDevice = dev;
+                        requestProjection();
+                    } else {
+                        startMirrorTo(dev);
+                    }
+                });
             }
 
             @Override
@@ -178,6 +216,7 @@ public class MirrorActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         stopService(new Intent(this, MirrorService.class));
+        CastKeepAliveService.stop(this);
         super.onDestroy();
     }
 }

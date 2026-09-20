@@ -52,6 +52,8 @@ public class MainActivity extends BaseActivity {
                 startActivity(new Intent(this, SettingsActivity.class)));
         findViewById(R.id.btn_volume).setOnClickListener(v -> VolumeDialog.show(this, null));
         findViewById(R.id.btn_qr).setOnClickListener(v -> scanQr());
+
+        Eula.showIfNeeded(this, null);
     }
 
     private void refreshCards() {

@@ -61,6 +61,8 @@ public class DeviceInfoParser {
                         serviceType = null;
                     } else if ("url".equals(name) && d.iconUrl == null) {
                         d.iconUrl = resolve(location, safe(xpp.nextText()));
+                    } else if ("key".equals(name) && (d.key == null || d.key.isEmpty())) {
+                        d.key = safe(xpp.nextText());
                     }
                 }
                 event = xpp.next();
@@ -80,6 +82,9 @@ public class DeviceInfoParser {
                 d.dialAppUrl = "http://" + d.ip + ":" + d.port + "/apps";
             }
             d.type = classify(modelName, d.name);
+            d.etcas = "ETCAS投屏客户端".equals(d.type)
+                    || (d.udn != null && d.udn.toLowerCase().contains("etcas"))
+                    || (modelName != null && modelName.toLowerCase().contains("etcas"));
             if (d.controlUrl == null && !d.dial) return null;
             return d;
         } catch (Exception e) {

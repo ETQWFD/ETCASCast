@@ -1,6 +1,8 @@
 package com.etc.cas.tv;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +10,7 @@ import android.os.Looper;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.etc.cas.tv.receiver.TvReceiverService;
@@ -15,18 +18,20 @@ import com.etc.cas.tv.util.NetUtil;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final int TOTAL_SECONDS = 20;
+    private static final int TOTAL_SECONDS = 5;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private ProgressBar progress;
     private TextView tvDevice;
     private TextView tvNet;
     private boolean deviceDone;
     private boolean netDone;
+    private boolean started;
     private int elapsed;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        TvApkDownloader.cleanup(this);
         setContentView(R.layout.activity_splash);
 
         progress = findViewById(R.id.progress);
@@ -35,6 +40,33 @@ public class SplashActivity extends AppCompatActivity {
         progress.setMax(TOTAL_SECONDS);
         progress.setProgress(0);
 
+        if (eulaAccepted()) {
+            begin();
+        } else {
+            showEula();
+        }
+    }
+
+    private boolean eulaAccepted() {
+        return getSharedPreferences("etcas_tv_eula", Context.MODE_PRIVATE)
+                .getBoolean("eula_accepted", false);
+    }
+
+    private void showEula() {
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.eula_title)
+                .setMessage(getString(R.string.eula_text))
+                .setCancelable(false)
+                .setPositiveButton(R.string.eula_agree, (d, w) -> {
+                    getSharedPreferences("etcas_tv_eula", Context.MODE_PRIVATE)
+                            .edit().putBoolean("eula_accepted", true).apply();
+                    begin();
+                })
+                .setNegativeButton(R.string.eula_exit, (d, w) -> finishAffinity())
+                .show();
+    }
+
+    private void begin() {
         Intent svc = new Intent(this, TvReceiverService.class).setAction(TvReceiverService.ACTION_START);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(svc);
         else startService(svc);
@@ -51,7 +83,7 @@ public class SplashActivity extends AppCompatActivity {
             try {
                 String model = Build.MANUFACTURER + " " + Build.MODEL;
                 ok = model != null && !model.trim().isEmpty();
-                Thread.sleep(400);
+                Thread.sleep(300);
             } catch (Exception ignored) {
             }
             boolean finalOk = ok;
@@ -71,7 +103,7 @@ public class SplashActivity extends AppCompatActivity {
         new Thread(() -> {
             boolean ok = false;
             String ip = "0.0.0.0";
-            for (int i = 0; i < 10; i++) {
+            for (int i = 0; i < 6; i++) {
                 ip = NetUtil.localIpv4();
                 if (NetUtil.isNetworkConnected(getApplicationContext())
                         && ip != null && !"0.0.0.0".equals(ip)) {
@@ -79,7 +111,7 @@ public class SplashActivity extends AppCompatActivity {
                     break;
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(800);
                 } catch (InterruptedException ignored) {
                 }
             }
@@ -111,7 +143,9 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void tryEnter() {
+        if (started) return;
         if (elapsed >= TOTAL_SECONDS && deviceDone && netDone) {
+            started = true;
             handler.removeCallbacksAndMessages(null);
             startActivity(new Intent(this, TvMainActivity.class));
             finish();

@@ -37,6 +37,7 @@ public class App extends Application {
         });
         ThemeManager.applyNightMode(this);
         LocalFileServer.AppHolder.init(this);
+        ApkUpdate.cleanup(this);
         Locale.setDefault(LocaleHelper.localeFor(Prefs.font(this)));
     }
 }

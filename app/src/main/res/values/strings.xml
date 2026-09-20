@@ -145,4 +145,19 @@
     <string name="qr_etcas_connected">已连接 ETCAS 电视客户端</string>
     <string name="cast_notif_title">ETCAS 投屏中</string>
     <string name="cast_notif_text">正在向电视投屏，熄屏或切换应用不会中断</string>
+
+    <string name="update_no_pkg">暂未找到可用的安装包</string>
+    <string name="update_downloading">正在下载更新…</string>
+    <string name="update_download_fail">下载失败，请重试</string>
+    <string name="update_install_fail">调起安装失败</string>
+    <string name="pair_title">输入配对码</string>
+    <string name="pair_code_hint">请输入电视上显示的配对码</string>
+    <string name="pairing">正在配对…</string>
+    <string name="pair_ok">配对成功</string>
+    <string name="pair_fail">配对失败，请确认配对码</string>
+    <string name="dev_website">官方网站（etc.os.kg）</string>
+    <string name="eula_title">ETCAS投屏 许可协议</string>
+    <string name="eula_agree">同意并继续</string>
+    <string name="eula_exit">不同意，退出</string>
+    <string name="eula_extra">致敬开发者：ETC协会\n翻译者：POAI\n\n本软件依据 MIT 许可证开源提供，仅供个人合法投屏使用。\n1. 投屏、屏幕镜像所涉及的内容版权归原权利人所有，请仅投屏您有权播放的内容，勿用于侵权用途。\n2. 软件在同一局域网内通过 DLNA/UPnP 传输媒体，不会上传您的文件；屏幕镜像仅在您主动开启并授权后运行，可随时停止。\n3. 本软件按“现状”提供，不对投屏兼容性、画质、延迟作任何明示或默示担保，因使用产生的风险由您自行承担。\n4. 请勿用于危害国家安全、传播违法信息或干扰他人设备等任何违法用途。\n点击“同意并继续”即表示您已阅读并同意以上条款及 MIT 许可证。</string>
 </resources>

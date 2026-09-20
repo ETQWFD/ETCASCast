@@ -13,6 +13,10 @@ public final class CastState {
         void onPlayStateChanged(boolean playing);
 
         void onVolumeChanged(int volume);
+
+        void onPaired();
+
+        void onCleared();
     }
 
     private static final CastState INSTANCE = new CastState();
@@ -22,6 +26,7 @@ public final class CastState {
     private volatile String uri;
     private volatile String title;
     private volatile boolean playing;
+    private volatile boolean paired;
     private volatile int volume = 80;
 
     private CastState() {
@@ -42,10 +47,35 @@ public final class CastState {
     public void setMedia(final String newUri, final String newTitle) {
         this.uri = newUri;
         this.title = newTitle;
+        if (newUri != null && !newUri.isEmpty()) this.paired = true;
         main.post(() -> {
             for (Listener l : listeners) l.onMediaChanged(newUri, newTitle);
             if (newUri != null && !newUri.isEmpty()) setPlaying(true);
         });
+    }
+
+    public void notifyPaired() {
+        this.paired = true;
+        main.post(() -> {
+            for (Listener l : listeners) l.onPaired();
+        });
+    }
+
+    public void clear() {
+        this.uri = null;
+        this.title = null;
+        this.playing = false;
+        this.paired = false;
+        main.post(() -> {
+            for (Listener l : listeners) {
+                l.onCleared();
+                l.onPlayStateChanged(false);
+            }
+        });
+    }
+
+    public boolean isPaired() {
+        return paired;
     }
 
     public void setPlaying(final boolean p) {

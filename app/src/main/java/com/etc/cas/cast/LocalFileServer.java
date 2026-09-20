@@ -81,6 +81,10 @@ public class LocalFileServer {
         return baseUrl(ctx) + "/mirror";
     }
 
+    public static String frameUrl(Context ctx) {
+        return baseUrl(ctx) + "/frame";
+    }
+
     public static String mirrorPageUrl(Context ctx) {
         return baseUrl(ctx) + "/mirrorpage";
     }
@@ -139,11 +143,17 @@ public class LocalFileServer {
                 }
             }
 
-            if (path.startsWith("/mirror")) {
-                serveMirror(s, out);
-            } else if (path.startsWith("/mirrorpage")) {
+            String pathOnly = path;
+            int q = pathOnly.indexOf('?');
+            if (q >= 0) pathOnly = pathOnly.substring(0, q);
+
+            if (pathOnly.startsWith("/frame")) {
+                serveFrame(out);
+            } else if (pathOnly.startsWith("/mirrorpage")) {
                 serveMirrorPage(out);
-            } else if (path.startsWith("/file")) {
+            } else if (pathOnly.startsWith("/mirror")) {
+                serveMirror(s, out);
+            } else if (pathOnly.startsWith("/file")) {
                 serveFile(s, out, rangeHeader);
             } else {
                 out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
@@ -258,6 +268,22 @@ public class LocalFileServer {
         out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n"
                 + "Content-Length: " + data.length + "\r\nConnection: close\r\n\r\n").getBytes());
         out.write(data);
+        out.flush();
+    }
+
+    private static void serveFrame(OutputStream out) throws IOException {
+        byte[] frame = mirrorFrame;
+        if (frame == null || frame.length == 0) {
+            out.write(("HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n"
+                    + "Cache-Control: no-store\r\nConnection: close\r\n\r\n").getBytes());
+            out.flush();
+            return;
+        }
+        out.write(("HTTP/1.1 200 OK\r\n"
+                + "Content-Type: image/jpeg\r\n"
+                + "Content-Length: " + frame.length + "\r\n"
+                + "Cache-Control: no-store\r\nConnection: close\r\n\r\n").getBytes());
+        out.write(frame);
         out.flush();
     }
 

@@ -65,6 +65,18 @@ public class TvMainActivity extends AppCompatActivity {
         }
     };
 
+    private final Runnable progressTicker = new Runnable() {
+        @Override
+        public void run() {
+            if (mode == MODE_VIDEO && player != null) {
+                long pos = player.getCurrentPosition();
+                long dur = player.getDuration();
+                CastState.get().setProgress(pos, dur);
+            }
+            handler.postDelayed(this, 1000);
+        }
+    };
+
     private final CastState.Listener stateListener = new CastState.Listener() {
         @Override
         public void onMediaChanged(String uri, String title) {
@@ -134,6 +146,22 @@ public class TvMainActivity extends AppCompatActivity {
                     tvStatus.setText(R.string.main_casting);
             }
         });
+
+        getOnBackPressedDispatcher().addCallback(this,
+                new androidx.activity.OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        if (mode != MODE_INFO) {
+                            CastState.get().clear();
+                            enterInfo();
+                        } else {
+                            setEnabled(false);
+                            getOnBackPressedDispatcher().onBackPressed();
+                        }
+                    }
+                });
+
+        handler.post(progressTicker);
     }
 
     @Override
@@ -224,6 +252,7 @@ public class TvMainActivity extends AppCompatActivity {
         infoPanel.setVisibility(View.GONE);
         playerView.setVisibility(View.VISIBLE);
         if (player != null) {
+            CastState.get().setProgress(0L, -1L);
             player.setMediaItem(MediaItem.fromUri(Uri.parse(uri)));
             player.prepare();
             player.play();
@@ -305,11 +334,21 @@ public class TvMainActivity extends AppCompatActivity {
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER
-                || keyCode == KeyEvent.KEYCODE_MENU) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_CENTER || keyCode == KeyEvent.KEYCODE_ENTER) {
+            if (mode == MODE_VIDEO && player != null) {
+                if (player.isPlaying()) {
+                    player.pause();
+                    CastState.get().setPlaying(false);
+                } else {
+                    player.play();
+                    CastState.get().setPlaying(true);
+                }
+                return true;
+            }
+        } else if (keyCode == KeyEvent.KEYCODE_MENU) {
             if (mode != MODE_INFO) {
-                enterInfo();
                 CastState.get().clear();
+                enterInfo();
                 return true;
             }
         }
@@ -319,6 +358,7 @@ public class TvMainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         handler.removeCallbacks(loadTicker);
+        handler.removeCallbacks(progressTicker);
         stopMirror();
         if (player != null) {
             player.release();

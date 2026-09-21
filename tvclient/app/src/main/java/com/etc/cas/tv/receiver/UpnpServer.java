@@ -121,7 +121,7 @@ public class UpnpServer {
                 writeXml(out, descriptionXml());
             } else if ("GET".equalsIgnoreCase(method) && path.startsWith("/etcas/info")) {
                 writeJson(out, "{\"name\":\"" + esc(friendlyName) + "\",\"model\":\"" + esc(model)
-                        + "\",\"android\":\"" + esc(androidVersion) + "\",\"key\":\"" + esc(key) + "\"}");
+                        + "\",\"android\":\"" + esc(androidVersion) + "\",\"pair\":true}");
             } else if ("POST".equalsIgnoreCase(method) && path.startsWith("/etcas/pair")) {
                 handlePair(out, body);
             } else if ("POST".equalsIgnoreCase(method) && path.contains("AVTransport")) {
@@ -164,7 +164,7 @@ public class UpnpServer {
                 CastState.get().setPlaying(false);
                 return soapResponse(AVT, "Pause");
             case "Stop":
-                CastState.get().clear();
+                CastState.get().setPlaying(false);
                 return soapResponse(AVT, "Stop");
             case "GetPositionInfo":
                 return positionInfoResponse();
@@ -250,11 +250,24 @@ public class UpnpServer {
     }
 
     private String positionInfoResponse() {
+        CastState s = CastState.get();
+        String rel = fmtTime(s.getPositionMs());
+        String dur = s.getDurationMs() > 0 ? fmtTime(s.getDurationMs()) : "00:00:00";
+        String uri = s.getUri() == null ? "" : s.getUri().replace("&", "&amp;").replace("<", "&lt;");
         return "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
                 + "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">"
                 + "<s:Body><u:GetPositionInfoResponse xmlns:u=\"" + AVT + "\">"
-                + "<Track>0</Track><TrackDuration>00:00:00</TrackDuration><TrackURI></TrackURI>"
-                + "<RelTime>00:00:00</RelTime></u:GetPositionInfoResponse></s:Body></s:Envelope>";
+                + "<Track>0</Track><TrackDuration>" + dur + "</TrackDuration><TrackURI>" + uri + "</TrackURI>"
+                + "<RelTime>" + rel + "</RelTime></u:GetPositionInfoResponse></s:Body></s:Envelope>";
+    }
+
+    private static String fmtTime(long ms) {
+        if (ms < 0) ms = 0;
+        long totalSec = ms / 1000L;
+        long h = totalSec / 3600L;
+        long m = (totalSec % 3600L) / 60L;
+        long sec = totalSec % 60L;
+        return String.format(java.util.Locale.US, "%02d:%02d:%02d", h, m, sec);
     }
 
     private String transportInfoResponse() {

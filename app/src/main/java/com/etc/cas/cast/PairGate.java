@@ -16,6 +16,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class PairGate {
 
@@ -23,23 +26,30 @@ public class PairGate {
         void onReady(CastDevice device);
     }
 
+    private static final Set<String> TRUSTED = Collections.synchronizedSet(new HashSet<>());
+
     public static void request(final Activity act, final CastDevice d, final Ready ready) {
         if (d == null || !d.etcas) {
             if (ready != null) ready.onReady(d);
             return;
         }
-        if (d.key != null && !d.key.isEmpty()) {
-            verify(act, d, d.key, ready, false);
-        } else {
-            askCode(act, d, ready);
+        if (TRUSTED.contains(identity(d))) {
+            if (ready != null) ready.onReady(d);
+            return;
         }
+        askCode(act, d, ready);
+    }
+
+    private static String identity(CastDevice d) {
+        if (d.udn != null && !d.udn.isEmpty()) return "u:" + d.udn;
+        return "h:" + d.ip + ":" + d.port;
     }
 
     private static void askCode(final Activity act, final CastDevice d, final Ready ready) {
         final EditText input = new EditText(act);
-        input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
         input.setHint(R.string.pair_code_hint);
-        input.setFilters(new android.text.InputFilter[]{new android.text.InputFilter.AllCaps(),
+        input.setFilters(new android.text.InputFilter[]{
                 new android.text.InputFilter.LengthFilter(6)});
         new AlertDialog.Builder(act)
                 .setTitle(R.string.pair_title)
@@ -47,31 +57,32 @@ public class PairGate {
                 .setView(input)
                 .setCancelable(false)
                 .setPositiveButton(R.string.confirm, (dlg, w) -> {
-                    String code = input.getText().toString().trim().toUpperCase();
-                    if (code.length() < 4) {
+                    String code = input.getText().toString().trim();
+                    if (code.length() != 6) {
                         Toast.makeText(act, R.string.pair_code_hint, Toast.LENGTH_SHORT).show();
                         askCode(act, d, ready);
                         return;
                     }
-                    verify(act, d, code, ready, true);
+                    verify(act, d, code, ready);
                 })
                 .setNegativeButton(R.string.cancel, null)
                 .show();
     }
 
     private static void verify(final Activity act, final CastDevice d, final String code,
-                               final Ready ready, final boolean allowRetry) {
+                               final Ready ready) {
         Toast.makeText(act, R.string.pairing, Toast.LENGTH_SHORT).show();
         new Thread(() -> {
             final boolean ok = postPair(d, code);
             act.runOnUiThread(() -> {
                 if (ok) {
                     d.key = code;
+                    TRUSTED.add(identity(d));
                     Toast.makeText(act, R.string.pair_ok, Toast.LENGTH_SHORT).show();
                     if (ready != null) ready.onReady(d);
                 } else {
                     Toast.makeText(act, R.string.pair_fail, Toast.LENGTH_LONG).show();
-                    if (allowRetry) askCode(act, d, ready);
+                    askCode(act, d, ready);
                 }
             });
         }, "etcas-pair").start();
@@ -100,8 +111,7 @@ public class PairGate {
             byte[] buf = new byte[512];
             int n;
             while ((n = in.read(buf)) > 0) bos.write(buf, 0, n);
-            String resp = bos.toString("UTF-8");
-            return resp.contains("\"ok\":true");
+            return bos.toString("UTF-8").contains("\"ok\":true");
         } catch (Exception e) {
             return false;
         } finally {

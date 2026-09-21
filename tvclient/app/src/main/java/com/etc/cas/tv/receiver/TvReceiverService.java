@@ -73,19 +73,13 @@ public class TvReceiverService extends Service {
     }
 
     private String loadKey() {
-        String k = prefs().getString("key", null);
-        if (k == null || k.length() != 6) {
-            byte[] b = new byte[3];
-            new SecureRandom().nextBytes(b);
-            char[] c = new char[6];
-            for (int i = 0; i < 3; i++) {
-                c[i * 2] = HEX[(b[i] >> 4) & 0xF];
-                c[i * 2 + 1] = HEX[b[i] & 0xF];
-            }
-            k = new String(c);
-            prefs().edit().putString("key", k).apply();
+        String saved = prefs().getString("pair_key", null);
+        if (saved != null && saved.matches("\\d{6}")) {
+            return saved;
         }
-        return k;
+        String code = String.valueOf(100000 + new SecureRandom().nextInt(900000));
+        prefs().edit().putString("pair_key", code).apply();
+        return code;
     }
 
     private String loadUdn() {

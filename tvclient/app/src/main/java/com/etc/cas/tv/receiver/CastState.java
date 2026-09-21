@@ -28,6 +28,8 @@ public final class CastState {
     private volatile boolean playing;
     private volatile boolean paired;
     private volatile int volume = 80;
+    private volatile long positionMs;
+    private volatile long durationMs = -1L;
 
     private CastState() {
     }
@@ -66,6 +68,8 @@ public final class CastState {
         this.title = null;
         this.playing = false;
         this.paired = false;
+        this.positionMs = 0L;
+        this.durationMs = -1L;
         main.post(() -> {
             for (Listener l : listeners) {
                 l.onCleared();
@@ -106,5 +110,18 @@ public final class CastState {
 
     public int getVolume() {
         return volume;
+    }
+
+    public void setProgress(long position, long duration) {
+        if (position >= 0) this.positionMs = position;
+        if (duration >= 0) this.durationMs = duration;
+    }
+
+    public long getPositionMs() {
+        return positionMs;
+    }
+
+    public long getDurationMs() {
+        return durationMs;
     }
 }

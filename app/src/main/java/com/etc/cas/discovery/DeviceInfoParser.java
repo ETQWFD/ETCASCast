@@ -61,7 +61,7 @@ public class DeviceInfoParser {
                         serviceType = null;
                     } else if ("url".equals(name) && d.iconUrl == null) {
                         d.iconUrl = resolve(location, safe(xpp.nextText()));
-                    } else if ("key".equals(name) && (d.key == null || d.key.isEmpty())) {
+                    } else if (isTag(name, "key") && (d.key == null || d.key.isEmpty())) {
                         d.key = safe(xpp.nextText());
                     }
                 }
@@ -92,6 +92,13 @@ public class DeviceInfoParser {
         } finally {
             if (conn != null) conn.disconnect();
         }
+    }
+
+    private static boolean isTag(String qname, String local) {
+        if (qname == null) return false;
+        if (qname.equals(local)) return true;
+        int p = qname.indexOf(':');
+        return p >= 0 && qname.substring(p + 1).equals(local);
     }
 
     private static String resolve(String base, String url) {

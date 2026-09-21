@@ -150,6 +150,16 @@
     <string name="update_downloading">Downloading update…</string>
     <string name="update_download_fail">Download failed, please try again</string>
     <string name="update_install_fail">Unable to start the installer</string>
+    <string name="udl_title">Downloading update</string>
+    <string name="udl_connecting">Connecting to server…</string>
+    <string name="udl_line">Trying fast channel %1$d/%2$d…</string>
+    <string name="udl_verify">Verifying package…</string>
+    <string name="udl_install">Preparing installer…</string>
+    <string name="udl_failed">All download channels failed. Check your network and retry.</string>
+    <string name="udl_cancel">Cancel</string>
+    <string name="udl_retry">Retry</string>
+    <string name="udl_meter">%1$s / %2$s  ·  %3$s/s</string>
+    <string name="udl_meter_unknown">%1$s  ·  %2$s/s</string>
     <string name="pair_title">Enter pairing code</string>
     <string name="pair_code_hint">Enter the pairing code shown on your TV</string>
     <string name="pairing">Pairing…</string>

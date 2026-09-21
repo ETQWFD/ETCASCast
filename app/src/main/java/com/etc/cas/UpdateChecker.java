@@ -44,6 +44,7 @@ public class UpdateChecker {
                 String notes = jo.optString("body", "");
                 String apkUrl = null;
                 String apkName = null;
+                long apkId = 0L;
                 JSONArray assets = jo.optJSONArray("assets");
                 if (assets != null) {
                     for (int i = 0; i < assets.length(); i++) {
@@ -54,6 +55,7 @@ public class UpdateChecker {
                                 && !lower.contains("-tv")) {
                             apkUrl = a.optString("browser_download_url", "");
                             apkName = name;
+                            apkId = a.optLong("id", 0L);
                             break;
                         }
                     }
@@ -65,8 +67,9 @@ public class UpdateChecker {
                 if (compare(tag, cur) > 0) {
                     final String url = apkUrl;
                     final String name = apkName;
+                    final long id = apkId;
                     final String fn = notes;
-                    act.runOnUiThread(() -> showDialog(act, tag, fn, url, name));
+                    act.runOnUiThread(() -> showDialog(act, tag, fn, url, name, id));
                 } else if (!silent) {
                     toast(act, act.getString(R.string.update_latest));
                 }
@@ -79,7 +82,7 @@ public class UpdateChecker {
     }
 
     private static void showDialog(Activity act, String version, String notes,
-                                   final String url, final String name) {
+                                   final String url, final String name, final long assetId) {
         String msg = act.getString(R.string.update_found) + " v" + version;
         if (notes != null && !notes.trim().isEmpty()) msg += "\n\n" + notes.trim();
         new AlertDialog.Builder(act)
@@ -87,7 +90,7 @@ public class UpdateChecker {
                 .setMessage(msg)
                 .setCancelable(false)
                 .setPositiveButton(R.string.update_download, (d, w) ->
-                        ApkUpdate.install(act, url, name, null))
+                        ApkUpdate.start(act, REPO, assetId, url, name, name))
                 .setNegativeButton(R.string.update_later, null)
                 .show();
     }

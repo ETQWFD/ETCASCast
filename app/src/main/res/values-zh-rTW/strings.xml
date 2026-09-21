@@ -150,6 +150,16 @@
     <string name="update_downloading">正在下載更新…</string>
     <string name="update_download_fail">下載失敗，請重試</string>
     <string name="update_install_fail">調起安裝失敗</string>
+    <string name="udl_title">正在下載更新</string>
+    <string name="udl_connecting">正在連接伺服器…</string>
+    <string name="udl_line">正在嘗試高速線路 %1$d/%2$d…</string>
+    <string name="udl_verify">正在校驗安裝包…</string>
+    <string name="udl_install">正在準備安裝…</string>
+    <string name="udl_failed">所有下載線路均失敗，請檢查網路後重試</string>
+    <string name="udl_cancel">取消</string>
+    <string name="udl_retry">重新下載</string>
+    <string name="udl_meter">%1$s / %2$s  ·  %3$s/s</string>
+    <string name="udl_meter_unknown">%1$s  ·  %2$s/s</string>
     <string name="pair_title">輸入配對碼</string>
     <string name="pair_code_hint">請輸入電視上顯示的配對碼</string>
     <string name="pairing">正在配對…</string>

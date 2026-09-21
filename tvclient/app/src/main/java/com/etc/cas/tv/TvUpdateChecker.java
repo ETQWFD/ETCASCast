@@ -36,6 +36,7 @@ public class TvUpdateChecker {
                 String notes = jo.optString("body", "");
                 String apkUrl = null;
                 String apkName = null;
+                long apkId = 0L;
                 JSONArray assets = jo.optJSONArray("assets");
                 if (assets != null) {
                     for (int i = 0; i < assets.length(); i++) {
@@ -44,6 +45,7 @@ public class TvUpdateChecker {
                         if (name.startsWith("etcascast-tv-v") && name.endsWith(".apk")) {
                             apkUrl = a.optString("browser_download_url", "");
                             apkName = a.optString("name", "");
+                            apkId = a.optLong("id", 0L);
                             break;
                         }
                     }
@@ -53,9 +55,10 @@ public class TvUpdateChecker {
                 if (compare(tag, cur) > 0) {
                     final String url = apkUrl;
                     final String fn = apkName;
+                    final long id = apkId;
                     final String ver = tag;
                     final String nb = notes;
-                    act.runOnUiThread(() -> showDialog(act, ver, nb, url, fn));
+                    act.runOnUiThread(() -> showDialog(act, ver, nb, url, fn, id));
                 }
             } catch (Exception ignored) {
             } finally {
@@ -65,7 +68,7 @@ public class TvUpdateChecker {
     }
 
     private static void showDialog(Activity act, String version, String notes,
-                                   final String url, final String name) {
+                                   final String url, final String name, final long assetId) {
         String msg = act.getString(R.string.update_found) + " v" + version;
         if (notes != null && !notes.trim().isEmpty()) msg += "\n\n" + notes.trim();
         new AlertDialog.Builder(act)
@@ -73,7 +76,7 @@ public class TvUpdateChecker {
                 .setMessage(msg)
                 .setCancelable(false)
                 .setPositiveButton(R.string.update_yes, (d, w) ->
-                        TvApkDownloader.install(act, url, name))
+                        TvApkDownloader.start(act, REPO, assetId, url, name))
                 .setNegativeButton(R.string.update_no, null)
                 .show();
     }

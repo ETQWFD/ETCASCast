@@ -150,6 +150,16 @@
     <string name="update_downloading">更新をダウンロード中…</string>
     <string name="update_download_fail">ダウンロードに失敗しました。もう一度お試しください</string>
     <string name="update_install_fail">インストーラーを起動できません</string>
+    <string name="udl_title">更新をダウンロード中</string>
+    <string name="udl_connecting">サーバーに接続中…</string>
+    <string name="udl_line">高速回線を試行中 %1$d/%2$d…</string>
+    <string name="udl_verify">パッケージを検証中…</string>
+    <string name="udl_install">インストーラーを準備中…</string>
+    <string name="udl_failed">すべての回線で失敗しました。ネットワークを確認して再試行してください</string>
+    <string name="udl_cancel">キャンセル</string>
+    <string name="udl_retry">再ダウンロード</string>
+    <string name="udl_meter">%1$s / %2$s  ·  %3$s/s</string>
+    <string name="udl_meter_unknown">%1$s  ·  %2$s/s</string>
     <string name="pair_title">ペアリングコードを入力</string>
     <string name="pair_code_hint">テレビに表示されたペアリングコードを入力してください</string>
     <string name="pairing">ペアリング中…</string>

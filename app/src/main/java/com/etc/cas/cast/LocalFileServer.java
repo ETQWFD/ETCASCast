@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.provider.OpenableColumns;
 
 import java.io.IOException;
@@ -23,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 public class LocalFileServer {
 
     private static final int BASE_PORT = 8388;
+    private static final int BUF_SIZE = 262144;
+    private static final int KEEP_ALIVE_TIMEOUT_MS = 15000;
+    private static final int MAX_REQUESTS_PER_CONN = 64;
     private static volatile ServerSocket server;
     private static volatile Thread acceptThread;
     private static volatile ThreadPoolExecutor pool;
@@ -30,12 +34,15 @@ public class LocalFileServer {
     private static volatile Uri currentUri;
     private static volatile String currentMime;
     private static volatile byte[] mirrorFrame;
+    private static volatile long mirrorSeq;
+    private static volatile WifiManager.WifiLock wifiLock;
 
     public static synchronized String start(Context ctx, Uri uri, String mime) {
         currentUri = uri;
         currentMime = mime;
         if (server != null) return baseUrl(ctx);
         running = true;
+        acquireWifiLock(ctx);
         try {
             ServerSocket ss = null;
             for (int port = BASE_PORT; port < BASE_PORT + 20; port++) {
@@ -45,19 +52,23 @@ public class LocalFileServer {
                 } catch (IOException ignored) {
                 }
             }
-            if (ss == null) return null;
+            if (ss == null) {
+                releaseWifiLock();
+                return null;
+            }
             server = ss;
-            pool = new ThreadPoolExecutor(2, 8, 20, TimeUnit.SECONDS,
+            pool = new ThreadPoolExecutor(2, 16, 30, TimeUnit.SECONDS,
                     new SynchronousQueue<>(), r -> {
                 Thread t = new Thread(r, "etcas-http-conn");
                 t.setDaemon(true);
-                t.setPriority(Thread.NORM_PRIORITY - 1);
+                t.setPriority(Thread.NORM_PRIORITY);
                 return t;
             }, new ThreadPoolExecutor.DiscardPolicy());
             acceptThread = new Thread(() -> acceptLoop(), "etcas-http");
             acceptThread.setDaemon(true);
             acceptThread.start();
         } catch (Exception e) {
+            releaseWifiLock();
             return null;
         }
         return baseUrl(ctx);
@@ -65,6 +76,7 @@ public class LocalFileServer {
 
     public static void setFrame(byte[] frame) {
         mirrorFrame = frame;
+        mirrorSeq++;
     }
 
     public static String baseUrl(Context ctx) {
@@ -89,10 +101,32 @@ public class LocalFileServer {
         return baseUrl(ctx) + "/mirrorpage";
     }
 
+    private static void acquireWifiLock(Context ctx) {
+        try {
+            if (wifiLock == null) {
+                WifiManager wm = (WifiManager) ctx.getApplicationContext()
+                        .getSystemService(Context.WIFI_SERVICE);
+                if (wm != null) {
+                    wifiLock = wm.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "etcas:cast-wifi");
+                    wifiLock.setReferenceCounted(false);
+                    wifiLock.acquire();
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    private static void releaseWifiLock() {
+        try {
+            if (wifiLock != null && wifiLock.isHeld()) wifiLock.release();
+        } catch (Exception ignored) {
+        }
+        wifiLock = null;
+    }
+
     public static synchronized void stop() {
         running = false;
         mirrorFrame = null;
-        currentUri = null;
         try {
             if (server != null) server.close();
         } catch (Exception ignored) {
@@ -103,12 +137,13 @@ public class LocalFileServer {
             pool.shutdownNow();
             pool = null;
         }
+        releaseWifiLock();
     }
 
     private static void acceptLoop() {
         while (running) {
             try {
-                Socket s = server.accept();
+                final Socket s = server.accept();
                 ThreadPoolExecutor p = pool;
                 if (p != null) p.execute(() -> handle(s));
                 else {
@@ -116,49 +151,76 @@ public class LocalFileServer {
                 }
             } catch (SocketTimeoutException ignored) {
             } catch (Exception e) {
-                break;
+                if (!running) break;
             }
         }
     }
 
+    private static String connHeader(boolean keep) {
+        return keep
+                ? "Connection: keep-alive\r\nKeep-Alive: timeout=15\r\n"
+                : "Connection: close\r\n";
+    }
+
     private static void handle(Socket s) {
+        boolean reusable = false;
         try {
-            s.setSoTimeout(20000);
+            s.setSoTimeout(KEEP_ALIVE_TIMEOUT_MS);
+            try {
+                s.setSendBufferSize(BUF_SIZE);
+                s.setReceiveBufferSize(BUF_SIZE);
+            } catch (Exception ignored) {
+            }
             InputStream in = s.getInputStream();
             OutputStream out = s.getOutputStream();
 
-            String requestLine = readLine(in);
-            if (requestLine == null) {
-                s.close();
-                return;
-            }
-            String[] parts = requestLine.split(" ");
-            String path = parts.length > 1 ? parts[1] : "/";
-            String rangeHeader = null;
+            for (int reqNo = 0; reqNo < MAX_REQUESTS_PER_CONN; reqNo++) {
+                String requestLine = readLine(in);
+                if (requestLine == null) break;
+                String[] parts = requestLine.split(" ");
+                if (parts.length < 2) break;
+                boolean http11 = requestLine.startsWith("GET") && requestLine.endsWith("HTTP/1.1");
+                String path = parts[1];
+                String rangeHeader = null;
+                boolean clientKeepAlive = http11;
 
-            String line;
-            while ((line = readLine(in)) != null && !line.isEmpty()) {
-                if (line.toLowerCase().startsWith("range:")) {
-                    rangeHeader = line.substring(6).trim();
+                String line;
+                while ((line = readLine(in)) != null && !line.isEmpty()) {
+                    String low = line.toLowerCase();
+                    if (low.startsWith("range:")) {
+                        rangeHeader = line.substring(6).trim();
+                    } else if (low.startsWith("connection:")) {
+                        String v = line.substring(11).trim().toLowerCase();
+                        clientKeepAlive = !v.contains("close");
+                        if (v.contains("keep-alive")) clientKeepAlive = true;
+                    }
                 }
-            }
 
-            String pathOnly = path;
-            int q = pathOnly.indexOf('?');
-            if (q >= 0) pathOnly = pathOnly.substring(0, q);
+                String pathOnly = path;
+                int q = pathOnly.indexOf('?');
+                if (q >= 0) pathOnly = pathOnly.substring(0, q);
 
-            if (pathOnly.startsWith("/frame")) {
-                serveFrame(out);
-            } else if (pathOnly.startsWith("/mirrorpage")) {
-                serveMirrorPage(out);
-            } else if (pathOnly.startsWith("/mirror")) {
-                serveMirror(s, out);
-            } else if (pathOnly.startsWith("/file")) {
-                serveFile(s, out, rangeHeader);
-            } else {
-                out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
-                out.flush();
+                reusable = false;
+                if (pathOnly.startsWith("/frame")) {
+                    serveFrame(out, clientKeepAlive);
+                    reusable = clientKeepAlive;
+                } else if (pathOnly.startsWith("/mirrorpage")) {
+                    serveMirrorPage(out, clientKeepAlive);
+                    reusable = clientKeepAlive;
+                } else if (pathOnly.startsWith("/mirror")) {
+                    serveMirror(out);
+                    reusable = false;
+                } else if (pathOnly.startsWith("/file")) {
+                    reusable = serveFile(in, out, rangeHeader, clientKeepAlive);
+                } else {
+                    out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n"
+                            + connHeader(clientKeepAlive) + "\r\n").getBytes());
+                    out.flush();
+                    reusable = clientKeepAlive;
+                }
+                if (!reusable) break;
             }
+        } catch (SocketTimeoutException ignored) {
         } catch (Exception ignored) {
         } finally {
             try {
@@ -168,17 +230,21 @@ public class LocalFileServer {
         }
     }
 
-    private static void serveFile(Socket s, OutputStream out, String rangeHeader) throws IOException {
+    private static boolean serveFile(InputStream ignoredIn, OutputStream out,
+                                     String rangeHeader, boolean clientKeepAlive) throws IOException {
         Context ctx = AppHolder.get();
         Uri uri = currentUri;
         if (ctx == null || uri == null) {
-            out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
+            out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n"
+                    + connHeader(clientKeepAlive) + "\r\n").getBytes());
             out.flush();
-            return;
+            return clientKeepAlive;
         }
         ContentResolver cr = ctx.getContentResolver();
         long total = querySize(cr, uri);
         String mime = currentMime != null ? currentMime : "application/octet-stream";
+
+        boolean keep = clientKeepAlive && total > 0;
 
         InputStream src;
         if ("file".equals(uri.getScheme())) {
@@ -187,9 +253,10 @@ public class LocalFileServer {
             src = cr.openInputStream(uri);
         }
         if (src == null) {
-            out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
+            out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n"
+                    + connHeader(clientKeepAlive) + "\r\n").getBytes());
             out.flush();
-            return;
+            return clientKeepAlive;
         }
 
         long start = 0;
@@ -213,14 +280,15 @@ public class LocalFileServer {
         if (total > 0 && end > total - 1) end = total - 1;
         if (start < 0) start = 0;
         if (partial && total > 0 && start >= total) {
-            out.write(("HTTP/1.1 416 Range Not Satisfiable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
+            out.write(("HTTP/1.1 416 Range Not Satisfiable\r\nContent-Length: 0\r\n"
+                    + connHeader(keep) + "\r\n").getBytes());
             out.flush();
             src.close();
-            return;
+            return keep;
         }
 
         long skip = start;
-        byte[] buf = new byte[65536];
+        byte[] buf = new byte[BUF_SIZE];
         while (skip > 0) {
             long n = src.skip(skip);
             if (n <= 0) {
@@ -238,15 +306,14 @@ public class LocalFileServer {
         } else {
             head.append("HTTP/1.1 200 OK\r\n");
         }
-        long len = total > 0 ? end - start + 1 : Long.MAX_VALUE;
         head.append("Content-Type: ").append(mime).append("\r\n");
-        if (total > 0) head.append("Content-Length: ").append(len).append("\r\n");
+        if (total > 0) head.append("Content-Length: ").append(end - start + 1).append("\r\n");
         head.append("Accept-Ranges: bytes\r\n");
-        head.append("Connection: close\r\n\r\n");
+        head.append(connHeader(keep)).append("\r\n");
         out.write(head.toString().getBytes());
         out.flush();
 
-        long remaining = len;
+        long remaining = total > 0 ? end - start + 1 : Long.MAX_VALUE;
         while (remaining > 0) {
             int n = src.read(buf, 0, (int) Math.min(buf.length, remaining));
             if (n < 0) break;
@@ -255,9 +322,10 @@ public class LocalFileServer {
         }
         out.flush();
         src.close();
+        return keep;
     }
 
-    private static void serveMirrorPage(OutputStream out) throws IOException {
+    private static void serveMirrorPage(OutputStream out, boolean keep) throws IOException {
         String html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
                 + "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">"
                 + "<title>ETCAS Mirror</title></head>"
@@ -266,28 +334,29 @@ public class LocalFileServer {
                 + "</body></html>";
         byte[] data = html.getBytes("UTF-8");
         out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8\r\n"
-                + "Content-Length: " + data.length + "\r\nConnection: close\r\n\r\n").getBytes());
+                + "Content-Length: " + data.length + "\r\n"
+                + connHeader(keep) + "\r\n").getBytes());
         out.write(data);
         out.flush();
     }
 
-    private static void serveFrame(OutputStream out) throws IOException {
+    private static void serveFrame(OutputStream out, boolean keep) throws IOException {
         byte[] frame = mirrorFrame;
         if (frame == null || frame.length == 0) {
             out.write(("HTTP/1.1 204 No Content\r\nContent-Length: 0\r\n"
-                    + "Cache-Control: no-store\r\nConnection: close\r\n\r\n").getBytes());
+                    + "Cache-Control: no-store\r\n" + connHeader(keep) + "\r\n").getBytes());
             out.flush();
             return;
         }
         out.write(("HTTP/1.1 200 OK\r\n"
                 + "Content-Type: image/jpeg\r\n"
                 + "Content-Length: " + frame.length + "\r\n"
-                + "Cache-Control: no-store\r\nConnection: close\r\n\r\n").getBytes());
+                + "Cache-Control: no-store\r\n" + connHeader(keep) + "\r\n").getBytes());
         out.write(frame);
         out.flush();
     }
 
-    private static void serveMirror(Socket s, OutputStream out) throws IOException {
+    private static void serveMirror(OutputStream out) throws IOException {
         if (mirrorFrame == null) {
             out.write(("HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n").getBytes());
             out.flush();
@@ -295,32 +364,32 @@ public class LocalFileServer {
         }
         out.write(("HTTP/1.1 200 OK\r\n"
                 + "Content-Type: multipart/x-mixed-replace; boundary=etcasframe\r\n"
-                + "Connection: close\r\n\r\n").getBytes());
+                + "Cache-Control: no-store\r\nConnection: close\r\n\r\n").getBytes());
         out.flush();
+        long lastSeq = mirrorSeq;
         int idle = 0;
         while (running) {
+            long seq = mirrorSeq;
             byte[] frame = mirrorFrame;
-            if (frame == null || frame.length == 0) {
-                if (++idle > 100) break;
+            if (seq == lastSeq || frame == null || frame.length == 0) {
+                if (++idle > 1000) break;
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(12);
                 } catch (InterruptedException ignored) {
+                    break;
                 }
                 continue;
             }
             idle = 0;
-            StringBuilder head = new StringBuilder();
-            head.append("--etcasframe\r\n");
-            head.append("Content-Type: image/jpeg\r\n");
-            head.append("Content-Length: ").append(frame.length).append("\r\n\r\n");
-            out.write(head.toString().getBytes());
+            lastSeq = seq;
+            StringBuilder h = new StringBuilder();
+            h.append("--etcasframe\r\n");
+            h.append("Content-Type: image/jpeg\r\n");
+            h.append("Content-Length: ").append(frame.length).append("\r\n\r\n");
+            out.write(h.toString().getBytes());
             out.write(frame);
             out.write("\r\n".getBytes());
             out.flush();
-            try {
-                Thread.sleep(40);
-            } catch (InterruptedException ignored) {
-            }
         }
     }
 

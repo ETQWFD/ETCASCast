@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 public class MirrorService extends Service {
 
     public static final String ACTION_START = "com.etc.cas.START_MIRROR";
-    private static final long FRAME_INTERVAL_MS = 66L;
+    private static final long FRAME_INTERVAL_MS = 50L;
 
     private MediaProjection projection;
     private VirtualDisplay vd;

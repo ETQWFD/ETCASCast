@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
+import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 
@@ -135,7 +136,11 @@ public class TvMainActivity extends AppCompatActivity {
                 getString(R.string.load_line_4)
         };
 
-        player = new ExoPlayer.Builder(this).build();
+        DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
+                .setBufferDurationsMs(1500, 30000, 300, 1000)
+                .setPrioritizeTimeOverSizeThresholds(true)
+                .build();
+        player = new ExoPlayer.Builder(this).setLoadControl(loadControl).build();
         playerView.setPlayer(player);
         player.addListener(new Player.Listener() {
             @Override
@@ -285,43 +290,98 @@ public class TvMainActivity extends AppCompatActivity {
         if (frameUrl == null || frameUrl.isEmpty()) return;
         stopMirror();
         mirroring = true;
+        final boolean multipart = frameUrl.contains("/mirror");
         mirrorThread = new Thread(() -> {
             while (mirroring) {
                 HttpURLConnection conn = null;
                 try {
-                    URL u = new URL(frameUrl + (frameUrl.contains("?") ? "&" : "?") + "t=" + System.currentTimeMillis());
+                    URL u = new URL(frameUrl);
                     conn = (HttpURLConnection) u.openConnection();
-                    conn.setConnectTimeout(2000);
-                    conn.setReadTimeout(3000);
+                    conn.setConnectTimeout(3000);
+                    conn.setReadTimeout(multipart ? 60000 : 3000);
                     conn.setRequestProperty("Connection", "close");
                     int code = conn.getResponseCode();
-                    if (code == 200) {
-                        InputStream in = conn.getInputStream();
+                    if (code != 200) throw new java.io.IOException("code " + code);
+                    java.io.BufferedInputStream bin =
+                            new java.io.BufferedInputStream(conn.getInputStream(), 65536);
+                    if (multipart) {
+                        while (mirroring) {
+                            String boundary = readAsciiLine(bin);
+                            if (boundary == null || !boundary.startsWith("--etcasframe")) break;
+                            if (boundary.startsWith("--etcasframe--")) break;
+                            int len = -1;
+                            String h;
+                            while ((h = readAsciiLine(bin)) != null && !h.isEmpty()) {
+                                int c = h.indexOf(':');
+                                if (c > 0 && h.substring(0, c).trim().equalsIgnoreCase("Content-Length")) {
+                                    try {
+                                        len = Integer.parseInt(h.substring(c + 1).trim());
+                                    } catch (Exception ignored) {
+                                    }
+                                }
+                            }
+                            if (len <= 0) break;
+                            byte[] data = new byte[len];
+                            int off = 0;
+                            while (off < len) {
+                                int r = bin.read(data, off, len - off);
+                                if (r < 0) break;
+                                off += r;
+                            }
+                            if (off < len) break;
+                            bin.read();
+                            bin.read();
+                            final Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, len);
+                            if (bmp != null) {
+                                runOnUiThread(() -> {
+                                    if (mode == MODE_MIRROR && mirroring) mirrorImage.setImageBitmap(bmp);
+                                });
+                            }
+                        }
+                    } else {
                         ByteArrayOutputStream bos = new ByteArrayOutputStream();
                         byte[] buf = new byte[32768];
                         int n;
-                        while ((n = in.read(buf)) > 0) bos.write(buf, 0, n);
+                        while ((n = bin.read(buf)) > 0) bos.write(buf, 0, n);
                         byte[] data = bos.toByteArray();
                         if (data.length > 0) {
                             final Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-                            if (bmp != null) runOnUiThread(() -> {
-                                if (mode == MODE_MIRROR) mirrorImage.setImageBitmap(bmp);
-                            });
+                            if (bmp != null) {
+                                runOnUiThread(() -> {
+                                    if (mode == MODE_MIRROR && mirroring) mirrorImage.setImageBitmap(bmp);
+                                });
+                            }
+                        }
+                        try {
+                            Thread.sleep(60);
+                        } catch (InterruptedException e) {
+                            break;
                         }
                     }
                 } catch (Exception ignored) {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
                 } finally {
                     if (conn != null) conn.disconnect();
-                }
-                try {
-                    Thread.sleep(80);
-                } catch (InterruptedException e) {
-                    break;
                 }
             }
         }, "etcas-tv-mirror");
         mirrorThread.setDaemon(true);
         mirrorThread.start();
+    }
+
+    private static String readAsciiLine(InputStream in) throws java.io.IOException {
+        java.io.ByteArrayOutputStream bos = new java.io.ByteArrayOutputStream(96);
+        int c;
+        while ((c = in.read()) != -1) {
+            if (c == '\n') break;
+            if (c != '\r') bos.write(c);
+        }
+        if (c == -1 && bos.size() == 0) return null;
+        return bos.toString("UTF-8");
     }
 
     private void stopMirror() {

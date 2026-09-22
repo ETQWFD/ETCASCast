@@ -129,7 +129,7 @@ public class MirrorActivity extends BaseActivity {
             final String frameUrl;
             try {
                 frameUrl = "etcas://mirror?u="
-                        + java.net.URLEncoder.encode(LocalFileServer.frameUrl(MirrorActivity.this), "UTF-8");
+                        + java.net.URLEncoder.encode(LocalFileServer.mirrorUrl(MirrorActivity.this), "UTF-8");
             } catch (Exception e) {
                 return;
             }

@@ -42,7 +42,7 @@ public class CastManager {
         soap(d.controlUrl, AVT, "Stop", "<InstanceID>0</InstanceID>");
         if (!setUri(d, uri, meta)) return false;
         try {
-            Thread.sleep(300);
+            Thread.sleep(150);
         } catch (InterruptedException ignored) {
         }
         return play(d);

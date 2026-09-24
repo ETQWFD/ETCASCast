@@ -127,6 +127,7 @@
     <string name="device_search_fail">搜尋裝置失敗，請檢查網路後重試</string>
     <string name="session_play_fail">該檔案無法播放，可能格式不受支援</string>
     <string name="format_not_supported">此格式暂不支持投屏，請先轉為視頻或圖片再投屏</string>
+    <string name="link_no_direct">此頁面未找到可投屏的視頻直鏈，請在手機端觀看</string>
     <string name="local_converting">正在轉換為 MP4…</string>
     <string name="local_converted">已轉換為 MP4，可正常投屏</string>
     <string name="local_convert_fail">轉換失敗，將按原始檔案嘗試投屏</string>

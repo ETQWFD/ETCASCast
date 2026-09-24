@@ -133,6 +133,7 @@ public class LinkCastActivity extends BaseActivity {
         i.putExtra("mime", videoInfo.contentType == null ? "" : videoInfo.contentType);
         i.putExtra("title", videoInfo.title == null ? "" : videoInfo.title);
         i.putExtra("isDirect", videoInfo.directMedia);
+        i.putExtra("referer", videoInfo.referer == null ? "" : videoInfo.referer);
         i.putExtra("device", d);
         startActivity(i);
     }

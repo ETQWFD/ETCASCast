@@ -52,6 +52,7 @@ public class CastSessionActivity extends BaseActivity {
     private String mime;
     private boolean isDirect;
     private boolean isImage;
+    private String linkReferer = "";
     private boolean started;
 
     private int quality = QUALITY_AUTO;
@@ -67,6 +68,8 @@ public class CastSessionActivity extends BaseActivity {
         title = getIntent().getStringExtra("title");
         mime = getIntent().getStringExtra("mime");
         isDirect = getIntent().getBooleanExtra("isDirect", true);
+        linkReferer = getIntent().getStringExtra("referer");
+        if (linkReferer == null) linkReferer = "";
         try {
             device = (CastDevice) getIntent().getSerializableExtra("device");
         } catch (Exception e) {
@@ -177,9 +180,21 @@ public class CastSessionActivity extends BaseActivity {
         if ("local".equals(mode)) {
             String base = LocalFileServer.start(this, Uri.parse(mediaUrl), mime);
             if (base != null) castUrl = LocalFileServer.fileUrl(this);
+        } else if ("link".equals(mode) && isDirect && !linkReferer.isEmpty()) {
+            castUrl = LocalFileServer.proxyUrl(mediaUrl, linkReferer);
+            if (castUrl == null) {
+                started = false;
+                Toast.makeText(this, R.string.link_no_direct, Toast.LENGTH_LONG).show();
+                return;
+            }
         }
 
         if (device != null) {
+            if (!isDirect && !isImage) {
+                started = false;
+                Toast.makeText(this, R.string.link_no_direct, Toast.LENGTH_LONG).show();
+                return;
+            }
             final CastDevice dev = device;
             final String url = castUrl;
             final String meta = buildMeta(title, mime);
@@ -376,6 +391,10 @@ public class CastSessionActivity extends BaseActivity {
             player = null;
         }
         if (webView != null) {
+            try {
+                playerFrame.removeView(webView);
+            } catch (Exception ignored) {
+            }
             webView.destroy();
             webView = null;
         }

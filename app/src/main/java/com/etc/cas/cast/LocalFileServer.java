@@ -14,12 +14,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -107,6 +109,17 @@ public class LocalFileServer {
             if (bmp == null) return uri;
             File dir = new File(ctx.getCacheDir(), "etcas_img");
             if (!dir.exists()) dir.mkdirs();
+            else {
+                File[] old = dir.listFiles();
+                if (old != null) {
+                    for (File f : old) {
+                        try {
+                            f.delete();
+                        } catch (Exception ignored) {
+                        }
+                    }
+                }
+            }
             File out = new File(dir, "cast_" + System.currentTimeMillis() + ".jpg");
             try (FileOutputStream fos = new FileOutputStream(out)) {
                 bmp.compress(Bitmap.CompressFormat.JPEG, 88, fos);
@@ -143,6 +156,21 @@ public class LocalFileServer {
 
     public static String mirrorPageUrl(Context ctx) {
         return baseUrl(ctx) + "/mirrorpage";
+    }
+
+    public static String proxyUrl(String target, String referer) {
+        Context ctx = AppHolder.get();
+        if (ctx == null) return null;
+        if (server == null || !running) {
+            if (start(ctx, Uri.parse(target), "video/mp4") == null) return null;
+        }
+        try {
+            return baseUrl(ctx) + "/proxy?u="
+                    + java.net.URLEncoder.encode(target, "UTF-8")
+                    + "&ref=" + java.net.URLEncoder.encode(referer == null ? "" : referer, "UTF-8");
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private static void acquireWifiLock(Context ctx) {
@@ -197,6 +225,98 @@ public class LocalFileServer {
             } catch (Exception e) {
                 if (!running) break;
             }
+        }
+    }
+
+    private static boolean serveProxy(OutputStream out, String path, String rangeHeader,
+                                      boolean clientKeepAlive) throws IOException {
+        String target = null;
+        String ref = null;
+        try {
+            int q = path.indexOf('?');
+            if (q >= 0) {
+                String query = path.substring(q + 1);
+                for (String kv : query.split("&")) {
+                    int eq = kv.indexOf('=');
+                    if (eq > 0) {
+                        String k = kv.substring(0, eq);
+                        String v = java.net.URLDecoder.decode(kv.substring(eq + 1), "UTF-8");
+                        if ("u".equals(k)) target = v;
+                        else if ("ref".equals(k)) ref = v;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        if (target == null || target.isEmpty()) {
+            out.write(("HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n"
+                    + connHeader(clientKeepAlive) + "\r\n").getBytes());
+            out.flush();
+            return clientKeepAlive;
+        }
+        HttpURLConnection conn = null;
+        try {
+            URL u = new URL(target);
+            conn = (HttpURLConnection) u.openConnection();
+            conn.setInstanceFollowRedirects(true);
+            conn.setConnectTimeout(8000);
+            conn.setReadTimeout(15000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent",
+                    "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36");
+            if (ref != null && !ref.isEmpty()) conn.setRequestProperty("Referer", ref);
+            if (rangeHeader != null) conn.setRequestProperty("Range", rangeHeader);
+            int code = conn.getResponseCode();
+            if (code < 200 || code >= 300) {
+                out.write(("HTTP/1.1 " + code + " " + reason(code) + "\r\nContent-Length: 0\r\n"
+                        + connHeader(clientKeepAlive) + "\r\n").getBytes());
+                out.flush();
+                return clientKeepAlive;
+            }
+            String ct = conn.getContentType();
+            long len = conn.getContentLengthLong();
+            StringBuilder head = new StringBuilder("HTTP/1.1 " + code + " " + reason(code) + "\r\n");
+            if (ct != null) head.append("Content-Type: ").append(ct).append("\r\n");
+            if (len >= 0) head.append("Content-Length: ").append(len).append("\r\n");
+            String ar = conn.getHeaderField("Accept-Ranges");
+            if (ar != null) head.append("Accept-Ranges: ").append(ar).append("\r\n");
+            head.append(connHeader(clientKeepAlive)).append("\r\n");
+            out.write(head.toString().getBytes());
+            out.flush();
+            InputStream in = conn.getInputStream();
+            byte[] buf = new byte[BUF_SIZE];
+            int n;
+            while ((n = in.read(buf)) > 0) {
+                out.write(buf, 0, n);
+            }
+            out.flush();
+            return clientKeepAlive && len > 0;
+        } catch (Exception e) {
+            try {
+                out.write(("HTTP/1.1 502 Bad Gateway\r\nContent-Length: 0\r\n"
+                        + connHeader(clientKeepAlive) + "\r\n").getBytes());
+                out.flush();
+            } catch (Exception ignored) {
+            }
+            return clientKeepAlive;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
+    private static String reason(int code) {
+        switch (code) {
+            case 200: return "OK";
+            case 206: return "Partial Content";
+            case 301: return "Moved Permanently";
+            case 302: return "Found";
+            case 304: return "Not Modified";
+            case 403: return "Forbidden";
+            case 404: return "Not Found";
+            case 416: return "Range Not Satisfiable";
+            case 500: return "Internal Server Error";
+            case 502: return "Bad Gateway";
+            default: return "Status";
         }
     }
 
@@ -256,6 +376,8 @@ public class LocalFileServer {
                     reusable = false;
                 } else if (pathOnly.startsWith("/file")) {
                     reusable = serveFile(in, out, rangeHeader, clientKeepAlive);
+                } else if (pathOnly.startsWith("/proxy")) {
+                    reusable = serveProxy(out, path, rangeHeader, clientKeepAlive);
                 } else {
                     out.write(("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n"
                             + connHeader(clientKeepAlive) + "\r\n").getBytes());

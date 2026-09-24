@@ -127,6 +127,7 @@
     <string name="device_search_fail">検索に失敗しました。ネットワークを確認して再試行してください。</string>
     <string name="session_play_fail">このファイルは再生できません。形式がサポートされていない可能性があります。</string>
     <string name="format_not_supported">この形式は投屏できません。動画または画像に変換してください。</string>
+    <string name="link_no_direct">このページから再生可能な動画リンクが見つかりません</string>
     <string name="local_converting">MP4 に変換中…</string>
     <string name="local_converted">MP4 に変換済み、投屏できます。</string>
     <string name="local_convert_fail">変換に失敗しました。元のファイルで投屏を試みます。</string>

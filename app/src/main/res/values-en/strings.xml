@@ -127,6 +127,7 @@
     <string name="device_search_fail">Search failed. Check your network and try again.</string>
     <string name="session_play_fail">Cannot play this file. The format may not be supported.</string>
     <string name="format_not_supported">This format is not supported for casting. Please convert it to a video or image first.</string>
+    <string name="link_no_direct">No playable video link found on this page</string>
     <string name="local_converting">Converting to MP4…</string>
     <string name="local_converted">Converted to MP4, ready to cast.</string>
     <string name="local_convert_fail">Conversion failed. Will try casting the original file.</string>

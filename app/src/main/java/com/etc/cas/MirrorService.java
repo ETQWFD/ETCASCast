@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 public class MirrorService extends Service {
 
     public static final String ACTION_START = "com.etc.cas.START_MIRROR";
-    private static final long FRAME_INTERVAL_MS = 50L;
+    private static final long FRAME_INTERVAL_MS = 40L;
 
     private MediaProjection projection;
     private VirtualDisplay vd;
@@ -117,7 +117,7 @@ public class MirrorService extends Service {
                     Bitmap frame = toBitmap(image, capW, capH);
                     if (frame == null) return;
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    frame.compress(Bitmap.CompressFormat.JPEG, 55, bos);
+                    frame.compress(Bitmap.CompressFormat.JPEG, 62, bos);
                     frame.recycle();
                     byte[] jpeg = bos.toByteArray();
                     if (jpeg.length > 0) LocalFileServer.setFrame(jpeg);

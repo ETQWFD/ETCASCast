@@ -3,10 +3,14 @@ package com.etc.cas.cast;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.provider.OpenableColumns;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,8 +42,13 @@ public class LocalFileServer {
     private static volatile WifiManager.WifiLock wifiLock;
 
     public static synchronized String start(Context ctx, Uri uri, String mime) {
-        currentUri = uri;
         currentMime = mime;
+        Uri serving = uri;
+        if (mime != null && mime.startsWith("image/")) {
+            serving = prepareImage(ctx, uri);
+            currentMime = "image/jpeg";
+        }
+        currentUri = serving;
         if (server != null) return baseUrl(ctx);
         running = true;
         acquireWifiLock(ctx);
@@ -77,6 +86,41 @@ public class LocalFileServer {
     public static void setFrame(byte[] frame) {
         mirrorFrame = frame;
         mirrorSeq++;
+    }
+
+    private static Uri prepareImage(Context ctx, Uri uri) {
+        try {
+            BitmapFactory.Options opts = new BitmapFactory.Options();
+            opts.inJustDecodeBounds = true;
+            try (InputStream is = openStream(ctx, uri)) {
+                BitmapFactory.decodeStream(is, null, opts);
+            }
+            if (opts.outWidth <= 0 || opts.outHeight <= 0) return uri;
+            int sample = 1;
+            while (Math.max(opts.outWidth / sample, opts.outHeight / sample) > 2560) sample *= 2;
+            Bitmap bmp;
+            try (InputStream is = openStream(ctx, uri)) {
+                opts.inJustDecodeBounds = false;
+                opts.inSampleSize = sample;
+                bmp = BitmapFactory.decodeStream(is, null, opts);
+            }
+            if (bmp == null) return uri;
+            File dir = new File(ctx.getCacheDir(), "etcas_img");
+            if (!dir.exists()) dir.mkdirs();
+            File out = new File(dir, "cast_" + System.currentTimeMillis() + ".jpg");
+            try (FileOutputStream fos = new FileOutputStream(out)) {
+                bmp.compress(Bitmap.CompressFormat.JPEG, 88, fos);
+            }
+            bmp.recycle();
+            return Uri.fromFile(out);
+        } catch (Exception e) {
+            return uri;
+        }
+    }
+
+    private static InputStream openStream(Context ctx, Uri uri) throws IOException {
+        if ("file".equals(uri.getScheme())) return new java.io.FileInputStream(uri.getPath());
+        return ctx.getContentResolver().openInputStream(uri);
     }
 
     public static String baseUrl(Context ctx) {

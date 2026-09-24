@@ -74,6 +74,43 @@ public class CastManager {
                 "<InstanceID>0</InstanceID><Channel>Master</Channel><DesiredVolume>" + v + "</DesiredVolume>");
     }
 
+    public static boolean setSpeed(CastDevice d, float speed) {
+        if (d == null) return false;
+        float rate = Math.max(0.25f, Math.min(2.0f, speed));
+        String param = java.net.URLEncoder.encode(String.valueOf(rate), java.nio.charset.StandardCharsets.UTF_8);
+        if (d.etcas) {
+            String base = d.location != null ? d.location : ("http://" + d.ip + ":" + d.port + "/rootDesc.xml");
+            String host = base;
+            try {
+                java.net.URL u = new java.net.URL(base);
+                int p = u.getPort() > 0 ? u.getPort() : (d.port > 0 ? d.port : 9170);
+                host = "http://" + u.getHost() + ":" + p;
+            } catch (Exception ignored) {
+            }
+            HttpURLConnection conn = null;
+            try {
+                URL url = new URL(host + "/etcas/speed");
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                byte[] body = ("rate=" + param).getBytes(java.nio.charset.StandardCharsets.UTF_8);
+                conn.getOutputStream().write(body);
+                int code = conn.getResponseCode();
+                return code == 200;
+            } catch (Exception e) {
+                return false;
+            } finally {
+                if (conn != null) conn.disconnect();
+            }
+        }
+        if (d.controlUrl == null) return false;
+        return soap(d.controlUrl, AVT, "SetPlaySpeed",
+                "<InstanceID>0</InstanceID><Speed>" + rate + "</Speed>");
+    }
+
     private static boolean soap(String controlUrl, String service, String action, String args) {
         if (controlUrl == null || controlUrl.isEmpty()) return false;
         HttpURLConnection conn = null;

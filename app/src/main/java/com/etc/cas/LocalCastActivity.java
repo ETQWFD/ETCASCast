@@ -58,6 +58,7 @@ public class LocalCastActivity extends BaseActivity {
 
     private void connectByUrl(String castUrl) {
         Toast.makeText(this, R.string.probing, Toast.LENGTH_SHORT).show();
+        final String scanKey = getIntent().getStringExtra("etcas_key");
         new DeviceDiscoverer().probeUrl(this, castUrl, (devices, stillSearching) -> runOnUiThread(() -> {
             if (devices == null || devices.isEmpty()) {
                 if (!stillSearching) {
@@ -65,6 +66,9 @@ public class LocalCastActivity extends BaseActivity {
                 }
             } else {
                 pendingDevice = devices.get(0);
+                if (scanKey != null && !scanKey.isEmpty() && pendingDevice.key == null) {
+                    pendingDevice.key = scanKey;
+                }
                 Toast.makeText(this, getString(R.string.qr_etcas_connected) + " · " + pendingDevice.name,
                         Toast.LENGTH_SHORT).show();
                 PairGate.request(this, pendingDevice, d -> {

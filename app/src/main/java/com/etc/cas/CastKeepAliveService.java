@@ -69,6 +69,15 @@ public class CastKeepAliveService extends Service {
         return START_STICKY;
     }
 
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        try {
+            startForeground(NOTIF_ID, buildNotification(getString(R.string.cast_notif_title)));
+        } catch (Exception ignored) {
+        }
+    }
+
     private Notification buildNotification(String title) {
         Intent open = new Intent(this, MainActivity.class)
                 .setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);

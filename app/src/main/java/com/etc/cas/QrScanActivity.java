@@ -30,6 +30,7 @@ public class QrScanActivity extends BaseActivity {
     private boolean cameraActive;
     private boolean launched;
     private boolean hintShown;
+    private String pendingEtcasKey;
 
     private final BarcodeCallback callback = new BarcodeCallback() {
         @Override
@@ -116,6 +117,8 @@ public class QrScanActivity extends BaseActivity {
             if (port != null && !port.isEmpty()) {
                 try { p = Integer.parseInt(port.trim()); } catch (Exception ignored) {}
             }
+            String k = u.getQueryParameter("k");
+            pendingEtcasKey = (k != null && !k.isEmpty()) ? k.trim() : null;
             return "http://" + ip.trim() + ":" + p + "/rootDesc.xml";
         } catch (Exception e) {
             return null;
@@ -132,6 +135,7 @@ public class QrScanActivity extends BaseActivity {
             Intent i = new Intent(this, LocalCastActivity.class);
             i.putExtra("auto_search", true);
             i.putExtra("cast_url", etcas);
+            if (pendingEtcasKey != null) i.putExtra("etcas_key", pendingEtcasKey);
             startActivity(i);
             finish();
             return;

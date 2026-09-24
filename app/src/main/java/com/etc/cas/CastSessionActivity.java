@@ -18,6 +18,7 @@ import android.widget.Toast;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.TrackSelectionParameters;
+import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.PlayerView;
 
@@ -110,8 +111,11 @@ public class CastSessionActivity extends BaseActivity {
         ThemeManager.apply(this);
         FontManager.apply(findViewById(android.R.id.content), this);
         refreshChips();
-        if (started && isDirect && player != null && player.getPlaybackState() != androidx.media3.common.Player.STATE_ENDED) {
-            player.play();
+        if (started && isDirect && player != null) {
+            if (player.getPlaybackState() != androidx.media3.common.Player.STATE_ENDED) {
+                player.setPlaybackParameters(new PlaybackParameters(speed, 1f));
+                player.play();
+            }
         }
     }
 
@@ -128,7 +132,11 @@ public class CastSessionActivity extends BaseActivity {
             loadImage();
         } else if (isDirect) {
             try {
-                player = new ExoPlayer.Builder(this).build();
+                DefaultLoadControl loadControl = new DefaultLoadControl.Builder()
+                        .setBufferDurationsMs(1500, 30000, 300, 1000)
+                        .setPrioritizeTimeOverSizeThresholds(true)
+                        .build();
+                player = new ExoPlayer.Builder(this).setLoadControl(loadControl).build();
                 playerView.setPlayer(player);
                 player.addListener(new androidx.media3.common.Player.Listener() {
                     @Override
@@ -221,6 +229,11 @@ public class CastSessionActivity extends BaseActivity {
                 }
                 if (player != null) {
                     player.setPlaybackParameters(new PlaybackParameters(s, 1f));
+                }
+                if (device != null) {
+                    final CastDevice dev = device;
+                    final float fs = s;
+                    new Thread(() -> CastManager.setSpeed(dev, fs), "etcas-speed").start();
                 }
             });
         }

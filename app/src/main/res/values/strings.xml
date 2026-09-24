@@ -126,6 +126,7 @@
     <string name="mirror_live_hint">设备正在实时查看您的屏幕，可返回主界面继续使用手机</string>
     <string name="device_search_fail">搜索设备失败，请检查网络后重试</string>
     <string name="session_play_fail">该文件无法播放，可能格式不受支持</string>
+    <string name="format_not_supported">此格式暂不支持投屏，请先转为视频或图片再投屏</string>
     <string name="local_converting">正在转换为 MP4…</string>
     <string name="local_converted">已转换为 MP4，可正常投屏</string>
     <string name="local_convert_fail">转换失败，将按原始文件尝试投屏</string>

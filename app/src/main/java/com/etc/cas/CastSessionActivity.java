@@ -166,6 +166,13 @@ public class CastSessionActivity extends BaseActivity {
         if (started) return;
         started = true;
 
+        if ("local".equals(mode) && mime != null
+                && !(mime.startsWith("video/") || mime.startsWith("image/") || mime.startsWith("audio/"))) {
+            started = false;
+            Toast.makeText(this, R.string.format_not_supported, Toast.LENGTH_LONG).show();
+            return;
+        }
+
         String castUrl = mediaUrl;
         if ("local".equals(mode)) {
             String base = LocalFileServer.start(this, Uri.parse(mediaUrl), mime);
@@ -176,8 +183,14 @@ public class CastSessionActivity extends BaseActivity {
             final CastDevice dev = device;
             final String url = castUrl;
             final String meta = buildMeta(title, mime);
+            final float curSpeed = speed;
+            final int curQuality = quality;
             new Thread(() -> {
                 boolean ok = CastManager.cast(dev, url, meta);
+                if (dev.etcas && ok) {
+                    CastManager.setSpeed(dev, curSpeed);
+                    CastManager.setQuality(dev, curQuality);
+                }
                 runOnUiThread(() -> {
                     TextView tv = findViewById(R.id.tv_status);
                     tv.setText(getString(R.string.session_casting_to) + dev.name
@@ -250,6 +263,11 @@ public class CastSessionActivity extends BaseActivity {
                     ThemeManager.colorChip(this, findViewById(ids[j]), j == q);
                 }
                 applyQuality();
+                if (device != null) {
+                    final CastDevice dev = device;
+                    final int fq = q;
+                    new Thread(() -> CastManager.setQuality(dev, fq), "etcas-quality").start();
+                }
             });
         }
     }

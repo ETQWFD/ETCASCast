@@ -71,7 +71,7 @@ public class LocalCastActivity extends BaseActivity {
                 }
                 Toast.makeText(this, getString(R.string.qr_etcas_connected) + " · " + pendingDevice.name,
                         Toast.LENGTH_SHORT).show();
-                PairGate.request(this, pendingDevice, d -> {
+                PairGate.requestQuick(this, pendingDevice, d -> {
                     if (fileUri == null) pickFile();
                 });
             }

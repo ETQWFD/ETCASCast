@@ -33,6 +33,18 @@ public class PairGate {
             if (ready != null) ready.onReady(d);
             return;
         }
+        if (TRUSTED.contains(identity(d))) {
+            if (ready != null) ready.onReady(d);
+            return;
+        }
+        askCode(act, d, ready);
+    }
+
+    public static void requestQuick(final Activity act, final CastDevice d, final Ready ready) {
+        if (d == null || !d.etcas) {
+            if (ready != null) ready.onReady(d);
+            return;
+        }
         if (d.key != null && !d.key.isEmpty()) {
             if (ready != null) ready.onReady(d);
             return;

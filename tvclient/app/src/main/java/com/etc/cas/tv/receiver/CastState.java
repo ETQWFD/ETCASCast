@@ -8,16 +8,24 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public final class CastState {
 
     public interface Listener {
-        void onMediaChanged(String uri, String title);
+        void onMediaChanged(String uri, String title, int kind);
 
         void onPlayStateChanged(boolean playing);
 
         void onVolumeChanged(int volume);
 
+        void onSpeedChanged(float speed);
+
+        void onQualityChanged(int quality);
+
         void onPaired();
 
         void onCleared();
     }
+
+    public static final int KIND_VIDEO = 0;
+    public static final int KIND_IMAGE = 1;
+    public static final int KIND_AUDIO = 2;
 
     private static final CastState INSTANCE = new CastState();
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -28,6 +36,9 @@ public final class CastState {
     private volatile boolean playing;
     private volatile boolean paired;
     private volatile int volume = 80;
+    private volatile float speed = 1.0f;
+    private volatile int quality = 0;
+    private volatile int mediaKind = KIND_VIDEO;
     private volatile long positionMs;
     private volatile long durationMs = -1L;
 
@@ -46,14 +57,19 @@ public final class CastState {
         listeners.remove(l);
     }
 
-    public void setMedia(final String newUri, final String newTitle) {
+    public void setMedia(final String newUri, final String newTitle, final int kind) {
         this.uri = newUri;
         this.title = newTitle;
+        this.mediaKind = kind;
         if (newUri != null && !newUri.isEmpty()) this.paired = true;
         main.post(() -> {
-            for (Listener l : listeners) l.onMediaChanged(newUri, newTitle);
+            for (Listener l : listeners) l.onMediaChanged(newUri, newTitle, kind);
             if (newUri != null && !newUri.isEmpty()) setPlaying(true);
         });
+    }
+
+    public int getKind() {
+        return mediaKind;
     }
 
     public void notifyPaired() {
@@ -94,6 +110,28 @@ public final class CastState {
         main.post(() -> {
             for (Listener l : listeners) l.onVolumeChanged(volume);
         });
+    }
+
+    public void setSpeed(final float s) {
+        this.speed = Math.max(0.25f, Math.min(2.0f, s));
+        main.post(() -> {
+            for (Listener l : listeners) l.onSpeedChanged(speed);
+        });
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setQuality(final int q) {
+        this.quality = Math.max(0, Math.min(3, q));
+        main.post(() -> {
+            for (Listener l : listeners) l.onQualityChanged(quality);
+        });
+    }
+
+    public int getQuality() {
+        return quality;
     }
 
     public String getUri() {

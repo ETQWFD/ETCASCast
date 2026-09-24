@@ -124,6 +124,10 @@ public class UpnpServer {
                         + "\",\"android\":\"" + esc(androidVersion) + "\",\"pair\":true}");
             } else if ("POST".equalsIgnoreCase(method) && path.startsWith("/etcas/pair")) {
                 handlePair(out, body);
+            } else if (path.startsWith("/etcas/speed")) {
+                handleSpeed(out, body, path);
+            } else if (path.startsWith("/etcas/quality")) {
+                handleQuality(out, body);
             } else if ("POST".equalsIgnoreCase(method) && path.contains("AVTransport")) {
                 writeXml(out, handleAvt(soapAction, body));
             } else if ("POST".equalsIgnoreCase(method) && path.contains("RenderingControl")) {
@@ -152,8 +156,16 @@ public class UpnpServer {
             case "SetAVTransportURI": {
                 String uri = tag(body, "CurrentURI");
                 String title = tagDcTitle(body);
+                String meta = tag(body, "CurrentURIMetaData");
+                int kind = CastState.KIND_VIDEO;
+                if (meta != null) {
+                    if (meta.contains("imageItem")) kind = CastState.KIND_IMAGE;
+                    else if (meta.contains("audioItem")) kind = CastState.KIND_AUDIO;
+                } else if (uri != null && isImageUri(uri)) {
+                    kind = CastState.KIND_IMAGE;
+                }
                 if (uri != null && !uri.isEmpty()) {
-                    CastState.get().setMedia(uri, title == null ? "" : title);
+                    CastState.get().setMedia(uri, title == null ? "" : title, kind);
                 }
                 return soapResponse(AVT, "SetAVTransportURI");
             }
@@ -194,6 +206,92 @@ public class UpnpServer {
                 + "Content-Length: " + data.length + "\r\nConnection: close\r\n\r\n")
                 .getBytes(StandardCharsets.UTF_8));
         out.write(data);
+    }
+
+    private void handleSpeed(OutputStream out, String body, String path) throws Exception {
+        float rate = 1.0f;
+        String raw = null;
+        if (body != null && !body.isEmpty()) {
+            for (String kv : body.split("&")) {
+                int eq = kv.indexOf('=');
+                if (eq > 0 && "rate".equals(kv.substring(0, eq))) raw = kv.substring(eq + 1);
+            }
+        }
+        if (raw == null && path != null && path.contains("rate=")) {
+            int idx = path.indexOf("rate=");
+            raw = path.substring(idx + 5);
+            int amp = raw.indexOf('&');
+            if (amp >= 0) raw = raw.substring(0, amp);
+        }
+        if (raw != null) {
+            try {
+                rate = Float.parseFloat(java.net.URLDecoder.decode(raw, "UTF-8"));
+            } catch (Exception ignored) {
+            }
+        }
+        CastState.get().setSpeed(rate);
+        byte[] data = ("{\"ok\":true,\"rate\":" + rate + "}").getBytes(StandardCharsets.UTF_8);
+        out.write(("HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n"
+                + "Content-Length: " + data.length + "\r\nConnection: close\r\n\r\n")
+                .getBytes(StandardCharsets.UTF_8));
+        out.write(data);
+    }
+
+    private void handleQuality(OutputStream out, String body) throws Exception {
+        int q = 0;
+        String raw = null;
+        if (body != null && !body.isEmpty()) {
+            for (String kv : body.split("&")) {
+                int eq = kv.indexOf('=');
+                if (eq > 0 && "quality".equals(kv.substring(0, eq))) raw = kv.substring(eq + 1);
+            }
+        }
+        if (raw != null) {
+            try {
+                raw = java.net.URLDecoder.decode(raw, "UTF-8");
+            } catch (Exception ignored) {
+            }
+            String v = raw.trim().toLowerCase();
+            if ("hd".equals(v)) q = 1;
+            else if ("sd".equals(v)) q = 2;
+            else if ("smooth".equals(v)) q = 3;
+        }
+        CastState.get().setQuality(q);
+        String name = q == 0 ? "auto" : q == 1 ? "hd" : q == 2 ? "sd" : "smooth";
+        byte[] data = ("{\"ok\":true,\"quality\":\"" + name + "\"}").getBytes(StandardCharsets.UTF_8);
+        out.write(("HTTP/1.1 200 OK\r\nContent-Type: application/json; charset=utf-8\r\n"
+                + "Content-Length: " + data.length + "\r\nConnection: close\r\n\r\n")
+                .getBytes(StandardCharsets.UTF_8));
+        out.write(data);
+    }
+
+    private static boolean isImageUri(String uri) {
+        if (uri == null) return false;
+        try {
+            String lower = uri.toLowerCase();
+            int q = lower.indexOf('?');
+            String p = q >= 0 ? lower.substring(0, q) : lower;
+            String[] exts = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"};
+            for (String e : exts) {
+                if (p.endsWith(e)) return true;
+            }
+            if (q >= 0) {
+                String query = uri.substring(q);
+                if (query.contains("img=1")) return true;
+                int eq = query.indexOf("u=");
+                if (eq >= 0) {
+                    String v = query.substring(eq + 2);
+                    int amp = v.indexOf('&');
+                    if (amp >= 0) v = v.substring(0, amp);
+                    v = v.toLowerCase();
+                    for (String e : exts) {
+                        if (v.contains(e)) return true;
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return false;
     }
 
     private String handleRend(String soapAction, String body) {

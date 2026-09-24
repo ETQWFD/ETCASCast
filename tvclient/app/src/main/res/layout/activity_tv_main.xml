@@ -124,6 +124,15 @@
         android:scaleType="fitCenter"
         android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FF000000"
+        android:contentDescription="@string/main_brand"
+        android:scaleType="fitCenter"
+        android:visibility="gone" />
+
     <FrameLayout
         android:id="@+id/loading_root"
         android:layout_width="match_parent"

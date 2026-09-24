@@ -179,7 +179,10 @@ public class CastSessionActivity extends BaseActivity {
         String castUrl = mediaUrl;
         if ("local".equals(mode)) {
             String base = LocalFileServer.start(this, Uri.parse(mediaUrl), mime);
-            if (base != null) castUrl = LocalFileServer.fileUrl(this);
+            if (base != null) {
+                castUrl = LocalFileServer.fileUrl(this);
+                if (isImage) castUrl += "?img=1";
+            }
         } else if ("link".equals(mode) && isDirect && !linkReferer.isEmpty()) {
             castUrl = LocalFileServer.proxyUrl(mediaUrl, linkReferer);
             if (castUrl == null) {

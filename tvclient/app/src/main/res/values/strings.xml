@@ -17,6 +17,8 @@
     <string name="main_waiting">等待手机连接 · 使用手机 ETCAS投屏 扫码或搜索本设备</string>
     <string name="main_loading">正在加载投屏内容…</string>
     <string name="main_casting">正在投屏播放</string>
+    <string name="main_image_fail">图片加载失败，请检查网络后重试</string>
+    <string name="main_image_loading">正在加载图片…</string>
     <string name="main_ip">连接 IP</string>
     <string name="main_key">配对密钥</string>
     <string name="main_qr_caption">手机扫码投屏</string>

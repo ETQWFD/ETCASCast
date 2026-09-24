@@ -125,18 +125,30 @@ public class VideoInfoFetcher {
             JSONObject pdata = new JSONObject(playJson).optJSONObject("data");
             String media = null;
             if (pdata != null) {
-                JSONArray durl = pdata.optJSONArray("durl");
-                if (durl != null && durl.length() > 0) media = durl.optJSONObject(0).optString("url");
-                if (media == null || media.isEmpty()) {
-                    JSONObject dash = pdata.optJSONObject("dash");
-                    if (dash != null) {
-                        JSONArray videos = dash.optJSONArray("video");
-                        if (videos != null && videos.length() > 0) {
-                            JSONObject v0 = videos.optJSONObject(0);
-                            media = v0.optString("baseUrl");
-                            if (media == null || media.isEmpty()) media = v0.optString("base_url");
+                JSONObject dash = pdata.optJSONObject("dash");
+                if (dash != null) {
+                    JSONArray videos = dash.optJSONArray("video");
+                    JSONObject best = null;
+                    long bestBw = -1;
+                    if (videos != null) {
+                        for (int i = 0; i < videos.length(); i++) {
+                            JSONObject v = videos.optJSONObject(i);
+                            if (v == null) continue;
+                            long bw = v.optLong("bandwidth", 0);
+                            if (bw > bestBw) {
+                                bestBw = bw;
+                                best = v;
+                            }
                         }
                     }
+                    if (best != null) {
+                        media = best.optString("baseUrl");
+                        if (media == null || media.isEmpty()) media = best.optString("base_url");
+                    }
+                }
+                if (media == null || media.isEmpty()) {
+                    JSONArray durl = pdata.optJSONArray("durl");
+                    if (durl != null && durl.length() > 0) media = durl.optJSONObject(0).optString("url");
                 }
             }
             if (media == null || media.isEmpty()) return null;

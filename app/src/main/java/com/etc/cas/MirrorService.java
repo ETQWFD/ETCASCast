@@ -54,8 +54,8 @@ public class MirrorService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null || !ACTION_START.equals(intent.getAction())) {
-            stopSelf();
-            return START_NOT_STICKY;
+            acquireLocks();
+            return START_STICKY;
         }
         Notification.Builder builder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -77,7 +77,27 @@ public class MirrorService extends Service {
         int code = intent.getIntExtra("code", 0);
         Intent data = intent.getParcelableExtra("data");
         startCapture(code, data);
-        return START_NOT_STICKY;
+        return START_STICKY;
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        Notification.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new Notification.Builder(this, "mirror");
+        } else {
+            builder = new Notification.Builder(this);
+        }
+        Notification notification = builder
+                .setContentTitle(getString(R.string.mirror_title))
+                .setContentText(getString(R.string.mirror_running))
+                .setSmallIcon(R.drawable.ic_cast)
+                .build();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+        } else {
+            startForeground(1, notification);
+        }
     }
 
     private void startCapture(int code, Intent data) {
@@ -144,7 +164,7 @@ public class MirrorService extends Service {
             PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "etcas:mirror-wake");
             wakeLock.setReferenceCounted(false);
-            wakeLock.acquire(60 * 60 * 1000L);
+            wakeLock.acquire();
         }
     }
 

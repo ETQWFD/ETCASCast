@@ -10,8 +10,8 @@ android {
         applicationId "com.etc.cas"
         minSdk 24
         targetSdk 34
-        versionCode 19
-        versionName "1.6.8"
+        versionCode 20
+        versionName "1.6.9"
     }
 
     signingConfigs {

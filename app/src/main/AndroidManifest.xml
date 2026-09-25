@@ -53,6 +53,11 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".AiChatActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".LocalCastActivity"
             android:exported="false"
             android:screenOrientation="portrait" />

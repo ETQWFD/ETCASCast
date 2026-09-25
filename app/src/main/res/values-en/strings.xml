@@ -138,6 +138,12 @@
 
     <string name="main_features">Local Cast · Screen Mirror · Link Cast · QR Cast</string>
     <string name="dev_tribute_entry">Credits</string>
+    <string name="dev_ai_entry">AI Support</string>
+    <string name="ai_welcome">Hello! I am the ETCAS Cast AI assistant. Ask me anything about casting.</string>
+    <string name="ai_thinking">Thinking…</string>
+    <string name="ai_error">Sorry, the service is busy. Please try again later.</string>
+    <string name="ai_input_hint">Type your question…</string>
+    <string name="ai_send">Send</string>
     <string name="dev_tribute_title">Credits</string>
     <string name="dev_tribute_body">Developer: ETC Association\nTranslator: POAI</string>
     <string name="version_fmt">Version %1$s</string>

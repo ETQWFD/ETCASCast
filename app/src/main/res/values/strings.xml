@@ -138,6 +138,12 @@
 
     <string name="main_features">本地投屏 · 屏幕同步 · 链接投屏 · 扫码投屏</string>
     <string name="dev_tribute_entry">开发者致谢</string>
+    <string name="dev_ai_entry">AI 客服</string>
+    <string name="ai_welcome">你好！我是 ETCAS 投屏 AI 客服，任何投屏问题都可以问我。</string>
+    <string name="ai_thinking">思考中…</string>
+    <string name="ai_error">抱歉，服务暂时繁忙，请稍后重试。</string>
+    <string name="ai_input_hint">请输入你的问题…</string>
+    <string name="ai_send">发送</string>
     <string name="dev_tribute_title">致谢</string>
     <string name="dev_tribute_body">致敬开发者：ETC协会\n翻译者：POAI</string>
     <string name="version_fmt">版本 %1$s</string>

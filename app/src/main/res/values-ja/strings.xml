@@ -138,6 +138,12 @@
 
     <string name="main_features">ローカル投写 · 画面ミラー · リンク投写 · QR投写</string>
     <string name="dev_tribute_entry">開発者クレジット</string>
+    <string name="dev_ai_entry">AIカスタマーサポート</string>
+    <string name="ai_welcome">こんにちは！ETCAS投屏AIカスタマーサポートです。投屏について何でも聞いてください。</string>
+    <string name="ai_thinking">考え中…</string>
+    <string name="ai_error">申し訳ございません、サービスが混み合っています。後でもう一度お試しください。</string>
+    <string name="ai_input_hint">質問を入力…</string>
+    <string name="ai_send">送信</string>
     <string name="dev_tribute_title">クレジット</string>
     <string name="dev_tribute_body">開発者：ETC協会\n翻訳者：POAI</string>
     <string name="version_fmt">バージョン %1$s</string>

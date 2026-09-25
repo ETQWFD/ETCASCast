@@ -212,14 +212,22 @@ public class DeviceDiscoverer {
                              final Set<String> seenUrls, final Listener listener) {
         final String prefix = subnetPrefix(ctx);
         if (prefix == null) return;
+        final int[] ports = {9170, 80, 8080, 8060, 9000, 49152, 5000, 1900};
+        final String[] paths = {"/rootDesc.xml", "/description.xml", "/dd.xml"};
         ExecutorService pool = Executors.newFixedThreadPool(32, DAEMON_FACTORY);
         List<Future<?>> futures = new ArrayList<>();
         for (int i = 1; i <= 254; i++) {
             final String ip = prefix + i;
             futures.add(pool.submit(() -> {
-                if (!tcpReachable(ip, 9170, 250)) return;
-                CastDevice d = DeviceInfoParser.parse("http://" + ip + ":9170/rootDesc.xml");
-                if (d == null) d = DeviceInfoParser.parse("http://" + ip + ":9170/etcas/desc");
+                CastDevice d = null;
+                for (int port : ports) {
+                    if (d != null) break;
+                    if (!tcpReachable(ip, port, 180)) continue;
+                    for (String path : paths) {
+                        d = DeviceInfoParser.parse("http://" + ip + ":" + port + path);
+                        if (d != null && d.controlUrl != null) break;
+                    }
+                }
                 if (d != null && d.controlUrl != null && seenUrls.add(deviceKey(d))) {
                     synchronized (result) {
                         result.add(d);
@@ -230,7 +238,7 @@ public class DeviceDiscoverer {
         }
         pool.shutdown();
         try {
-            pool.awaitTermination(12, java.util.concurrent.TimeUnit.SECONDS);
+            pool.awaitTermination(14, java.util.concurrent.TimeUnit.SECONDS);
         } catch (InterruptedException ignored) {
         }
         for (Future<?> f : futures) f.cancel(true);

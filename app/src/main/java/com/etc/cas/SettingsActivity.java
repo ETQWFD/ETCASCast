@@ -59,6 +59,8 @@ public class SettingsActivity extends BaseActivity {
         findViewById(R.id.row_license).setOnClickListener(v -> showLicense());
         findViewById(R.id.row_website).setOnClickListener(v -> openWebsite());
         findViewById(R.id.row_tribute).setOnClickListener(v -> showTribute());
+        findViewById(R.id.row_ai).setOnClickListener(v ->
+                startActivity(new Intent(this, AiChatActivity.class)));
 
         ((TextView) findViewById(R.id.tv_dev_version))
                 .setText(getString(R.string.version_fmt, BuildConfig.VERSION_NAME));

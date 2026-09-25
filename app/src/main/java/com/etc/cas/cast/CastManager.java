@@ -16,9 +16,11 @@ public class CastManager {
 
     public static boolean setUri(CastDevice d, String uri, String meta) {
         String safeUri = uri == null ? "" : uri.replace("&", "&amp;");
+        String safeMeta = meta == null ? "" : meta
+                .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
         String args = "<InstanceID>0</InstanceID>"
                 + "<CurrentURI>" + safeUri + "</CurrentURI>"
-                + "<CurrentURIMetaData>" + (meta == null ? "" : meta) + "</CurrentURIMetaData>";
+                + "<CurrentURIMetaData>" + safeMeta + "</CurrentURIMetaData>";
         return soap(d.controlUrl, AVT, "SetAVTransportURI", args);
     }
 

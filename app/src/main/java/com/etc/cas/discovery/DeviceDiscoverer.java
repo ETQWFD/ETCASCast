@@ -7,6 +7,7 @@ import android.os.Looper;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
@@ -111,7 +112,11 @@ public class DeviceDiscoverer {
 
             socket = new MulticastSocket(null);
             socket.setReuseAddress(true);
-            socket.bind(new InetSocketAddress(0));
+            try {
+                socket.bind(new InetSocketAddress(SSDP_PORT));
+            } catch (IOException e) {
+                socket.bind(new InetSocketAddress(0));
+            }
             socket.setSoTimeout(1000);
 
             InetAddress group = InetAddress.getByName(SSDP_ADDR);
@@ -125,16 +130,21 @@ public class DeviceDiscoverer {
             post(listener, result, true);
 
             final Set<String> locations = new LinkedHashSet<>();
-            long end = System.currentTimeMillis() + 12000;
+            long end = System.currentTimeMillis() + 15000;
             long lastSend = 0;
 
+            Thread subnetProbe = new Thread(() -> probeSubnet(ctx, result, seenUrls, listener),
+                    "etcas-subnet-probe");
+            subnetProbe.setDaemon(true);
+            subnetProbe.start();
+
             while (System.currentTimeMillis() < end) {
-                if (System.currentTimeMillis() - lastSend > 1500) {
+                if (System.currentTimeMillis() - lastSend > 1000) {
                     for (String st : SEARCH_TARGETS) {
                         String msg = "M-SEARCH * HTTP/1.1\r\n"
                                 + "HOST: " + SSDP_ADDR + ":" + SSDP_PORT + "\r\n"
                                 + "MAN: \"ssdp:discover\"\r\n"
-                                + "MX: 2\r\n"
+                                + "MX: 3\r\n"
                                 + "ST: " + st + "\r\n"
                                 + "USER-AGENT: ETCASCast/1.4\r\n\r\n";
                         try {
@@ -196,6 +206,75 @@ public class DeviceDiscoverer {
         } catch (InterruptedException ignored) {
         }
         post(listener, snapshot(result), false);
+    }
+
+    private void probeSubnet(final Context ctx, final List<CastDevice> result,
+                             final Set<String> seenUrls, final Listener listener) {
+        final String prefix = subnetPrefix(ctx);
+        if (prefix == null) return;
+        ExecutorService pool = Executors.newFixedThreadPool(32, DAEMON_FACTORY);
+        List<Future<?>> futures = new ArrayList<>();
+        for (int i = 1; i <= 254; i++) {
+            final String ip = prefix + i;
+            futures.add(pool.submit(() -> {
+                if (!tcpReachable(ip, 9170, 250)) return;
+                CastDevice d = DeviceInfoParser.parse("http://" + ip + ":9170/rootDesc.xml");
+                if (d == null) d = DeviceInfoParser.parse("http://" + ip + ":9170/etcas/desc");
+                if (d != null && d.controlUrl != null && seenUrls.add(deviceKey(d))) {
+                    synchronized (result) {
+                        result.add(d);
+                    }
+                    post(listener, snapshot(result), true);
+                }
+            }));
+        }
+        pool.shutdown();
+        try {
+            pool.awaitTermination(12, java.util.concurrent.TimeUnit.SECONDS);
+        } catch (InterruptedException ignored) {
+        }
+        for (Future<?> f : futures) f.cancel(true);
+        pool.shutdownNow();
+    }
+
+    private static boolean tcpReachable(String ip, int port, int timeoutMs) {
+        try (java.net.Socket s = new java.net.Socket()) {
+            s.connect(new InetSocketAddress(ip, port), timeoutMs);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static String subnetPrefix(Context ctx) {
+        try {
+            WifiManager wm = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
+            if (wm == null) return null;
+            int ip = wm.getConnectionInfo() != null ? wm.getConnectionInfo().getIpAddress() : 0;
+            if (ip == 0) {
+                for (java.util.Enumeration<NetworkInterface> en =
+                     NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+                    NetworkInterface ni = en.nextElement();
+                    if (!ni.isUp() || ni.isLoopback()) continue;
+                    for (java.util.Enumeration<InetAddress> ea = ni.getInetAddresses(); ea.hasMoreElements(); ) {
+                        InetAddress ia = ea.nextElement();
+                        if (ia instanceof Inet4Address && !ia.isLinkLocalAddress()) {
+                            byte[] b = ia.getAddress();
+                            ip = ((b[0] & 0xFF) << 24) | ((b[1] & 0xFF) << 16)
+                                    | ((b[2] & 0xFF) << 8) | (b[3] & 0xFF);
+                            if ((b[0] & 0xFF) == 10 || (b[0] & 0xFF) == 172 || (b[0] & 0xFF) == 192) break;
+                        }
+                    }
+                }
+            }
+            if (ip == 0) return null;
+            int a = (ip >>> 24) & 0xFF;
+            int b = (ip >>> 16) & 0xFF;
+            int c = (ip >>> 8) & 0xFF;
+            return a + "." + b + "." + c + ".";
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private interface ParseCallback {

@@ -74,7 +74,7 @@ public class SsdpServer {
                 String low = text.toLowerCase();
                 if (!low.startsWith("m-search")) continue;
                 if (matchesTarget(text)) {
-                    reply(dp.getAddress(), dp.getPort());
+                    reply(dp.getAddress(), dp.getPort(), text);
                 }
             } catch (java.net.SocketTimeoutException ignored) {
             } catch (Exception e) {
@@ -91,15 +91,32 @@ public class SsdpServer {
                 || low.contains("device:basic");
     }
 
-    private void reply(InetAddress addr, int port) {
+    private void reply(InetAddress addr, int port, String request) {
         try {
+            String st = DEVICE_TYPE;
+            String low = request.toLowerCase();
+            int si = low.indexOf("st:");
+            if (si >= 0) {
+                String v = request.substring(si + 3).trim();
+                int cr = v.indexOf('\r');
+                int nl = v.indexOf('\n');
+                int cut = cr > 0 ? cr : nl;
+                if (cut > 0) v = v.substring(0, cut);
+                v = v.trim();
+                if (!v.isEmpty()) st = v;
+            }
+            try {
+                Thread.sleep((long) (Math.random() * 100));
+            } catch (InterruptedException ignored) {
+                return;
+            }
             String msg = "HTTP/1.1 200 OK\r\n"
                     + "CACHE-CONTROL: max-age=1800\r\n"
                     + "DATE: \r\n"
                     + "EXT:\r\n"
                     + "LOCATION: " + location() + "\r\n"
                     + "SERVER: Linux/1.0 UPnP/1.0 ETCASCastTV/1.0\r\n"
-                    + "ST: " + DEVICE_TYPE + "\r\n"
+                    + "ST: " + st + "\r\n"
                     + "USN: " + udn + "::urn:schemas-upnp-org:device:MediaRenderer:1\r\n"
                     + "X-ETCAS-KEY: 1\r\n"
                     + "FRIENDLY-NAME: " + friendlyName + "\r\n\r\n";

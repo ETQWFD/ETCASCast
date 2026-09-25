@@ -372,9 +372,10 @@ public class CastSessionActivity extends BaseActivity {
     }
 
     private String buildMeta(String title, String mime) {
-        String cls = "object.item.videoItem";
-        if (mime != null && mime.startsWith("image/")) cls = "object.item.imageItem";
+        String cls;
+        if (isImage) cls = "object.item.imageItem";
         else if (mime != null && mime.startsWith("audio/")) cls = "object.item.audioItem";
+        else cls = "object.item.videoItem";
         String safeTitle = title == null ? "" : title
                 .replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
         return "<DIDL-Lite xmlns=\"urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/\" "

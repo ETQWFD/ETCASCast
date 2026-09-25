@@ -66,7 +66,7 @@ public class LocalCastActivity extends BaseActivity {
                 }
             } else {
                 pendingDevice = devices.get(0);
-                if (scanKey != null && !scanKey.isEmpty() && pendingDevice.key == null) {
+                if (scanKey != null && !scanKey.isEmpty()) {
                     pendingDevice.key = scanKey;
                 }
                 Toast.makeText(this, getString(R.string.qr_etcas_connected) + " · " + pendingDevice.name,

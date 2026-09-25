@@ -18,8 +18,8 @@ public class DeviceInfoParser {
         try {
             URL url = new URL(location);
             conn = (HttpURLConnection) url.openConnection();
-            conn.setConnectTimeout(3000);
-            conn.setReadTimeout(3000);
+            conn.setConnectTimeout(5000);
+            conn.setReadTimeout(5000);
             conn.setRequestProperty("User-Agent", "ETCASCast/1.4");
             conn.setRequestMethod("GET");
             int code = conn.getResponseCode();
